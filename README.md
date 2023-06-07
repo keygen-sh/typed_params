@@ -636,39 +636,39 @@ end
 
 #### String type
 
-Defines a string parameter. Must be a `String`.
+Type `:string`. Defines a string parameter. Must be a `String`.
 
 #### Boolean type
 
-Defines a boolean parameter. Must be `TrueClass` or `FalseClass`.
+Type `:boolean`. Defines a boolean parameter. Must be `TrueClass` or `FalseClass`.
 
 #### Integer type
 
-Defines an integer parameter. Must be an `Integer`.
+Type `:integer`. Defines an integer parameter. Must be an `Integer`.
 
 #### Float type
 
-Defines a float parameter. Must be a `Float`.
+Type `:float`. Defines a float parameter. Must be a `Float`.
 
 #### Decimal type
 
-Defines a decimal parameter. Must be a `BigDecimal`.
+Type `:decimal`. Defines a decimal parameter. Must be a `BigDecimal`.
 
 #### Number type
 
-Defines a number parameter. Must be either an `Integer`, a `Float`, or a `BigDecimal`.
+Type `:number`. Defines a number parameter. Must be either an `Integer`, a `Float`, or a `BigDecimal`.
 
 #### Symbol type
 
-Defines a symbol parameter. Must be a `Symbol`.
+Type `:symbol`. Defines a symbol parameter. Must be a `Symbol`.
 
 #### Time type
 
-Defines a time parameter. Must be a `Time`.
+Type `:time`. Defines a time parameter. Must be a `Time`.
 
 #### Date type
 
-Defines a time parameter. Must be a `Date`.
+Type `:date`. Defines a date parameter. Must be a `Date`.
 
 ### Non-scalar types
 
@@ -677,7 +677,7 @@ Defines a time parameter. Must be a `Date`.
 
 #### Array type
 
-Defines an array parameter. Must be an `Array`.
+Type `:array`. Defines an array parameter. Must be an `Array`.
 
 Arrays are a special type. They can accept a block that defines its item types,
 which may be a nested schema.
@@ -698,7 +698,7 @@ end
 
 #### Hash type
 
-Defines a hash parameter. Must be a `Hash`.
+Type `:hash`. Defines a hash parameter. Must be a `Hash`.
 
 Hashes are a special type. They can accept a block that defines a nested schema.
 
