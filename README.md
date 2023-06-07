@@ -571,7 +571,7 @@ param :role, type: :string, transform: -> _, name {
 The lambda must accept a key (the current parameter key), and a value (the
 current parameter value).
 
-The lamda must return a tuple with the new key and value.
+The lambda must return a tuple with the new key and value.
 
 #### Validate parameter
 
