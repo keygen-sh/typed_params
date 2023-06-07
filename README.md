@@ -389,7 +389,7 @@ Parameters can have validations, transforms, and more.
 - [`:strict`](#strict-parameter)
 - [`:optional`](#optional-parameter)
 - [`:if` and `:unless`](#conditional-parameter)
-- [`:as`](#alias-parameter)
+- [`:as`](#rename-parameter)
 - [`:noop`](#noop-parameter)
 - [`:coerce`](#coerced-parameter)
 - [`:allow_blank`](#allow-blank)
@@ -461,7 +461,7 @@ param :role, type: :string, unless: :guest?
 
 The lambda will be evaled within the current controller context.
 
-#### Alias parameter
+#### Rename parameter
 
 Apply a transformation that renames the parameter.
 
