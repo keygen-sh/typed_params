@@ -746,9 +746,11 @@ TypedParams.types.register(:metadata,
 
 ### Formats
 
-Out of the box, `typed_params` ships with 2 formatters. Formatters are
+Out of the box, `typed_params` ships with two formatters. Formatters are
 run after all validations and transforms, formatting the params from
-1 format to another format.
+one format to another format.
+
+By default, no formatter is used.
 
 #### JSONAPI format
 
