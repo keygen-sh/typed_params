@@ -446,7 +446,7 @@ Apply a transformation that renames the parameter.
 ```ruby
 param :user, type: :integer, as: :user_id
 
-typed_params # => { user_id: '...' }
+typed_params # => { user_id: 1 }
 ```
 
 In this example, the parameter would be accepted as `:user`, but renamed
@@ -563,8 +563,8 @@ Transform the parameter using a lambda. This is commonly used to transform a
 parameter into a nested attributes hash or array.
 
 ```ruby
-param :user, type: :string, transform: -> _key, email {
-  [:user_attributes, { email: }]
+param :role, type: :string, transform: -> _, name {
+  [:role_attributes, { name: }]
 }
 ```
 
