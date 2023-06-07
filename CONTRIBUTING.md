@@ -13,7 +13,7 @@ Please try to answer the following questions in your bug report:
 - What happened instead?
 
 Make sure to include as much relevant information as possible. Ruby version,
-Rails version, `typed_parameters` version, OS version and any stack traces
+Rails version, `typed_params` version, OS version and any stack traces
 you have are very valuable.
 
 ## Pull Requests

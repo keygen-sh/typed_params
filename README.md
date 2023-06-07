@@ -1,9 +1,9 @@
-# typed_parameters
+# typed_params
 
-[![CI](https://github.com/keygen-sh/typed_parameters/actions/workflows/test.yml/badge.svg)](https://github.com/keygen-sh/typed_parameters/actions)
-[![Gem Version](https://badge.fury.io/rb/typed_parameters.svg)](https://badge.fury.io/rb/typed_parameters)
+[![CI](https://github.com/keygen-sh/typed_params/actions/workflows/test.yml/badge.svg)](https://github.com/keygen-sh/typed_params/actions)
+[![Gem Version](https://badge.fury.io/rb/typed_params.svg)](https://badge.fury.io/rb/typed_params)
 
-`typed_parameters` is an alternative to Rails strong parameters for controller params,
+`typed_params` is an alternative to Rails strong parameters for controller params,
 offering an intuitive DSL for defining structured and strongly-typed controller
 parameter schemas for Rails APIs.
 
@@ -12,13 +12,13 @@ to serve millions of API requests per day.
 
 Sponsored by:
 
-[![Keygen logo](https://github.com/keygen-sh/typed_parameters/assets/6979737/f2947915-2956-4415-a9c0-5411c388ea96)](https://keygen.sh)
+[![Keygen logo](https://github.com/keygen-sh/typed_params/assets/6979737/f2947915-2956-4415-a9c0-5411c388ea96)](https://keygen.sh)
 
 _An open, source-available software licensing and distribution API._
 
 Links:
 
-- [Installing `typed_parameters`](#installation)
+- [Installing `typed_params`](#installation)
 - [Supported Ruby versions](#supported-rubies)
 - [RubyDoc](#documentation)
 - [Usage](#usage)
@@ -39,17 +39,33 @@ Links:
 
 ## Installation
 
-[TBD](https://github.com/keygen-sh/keygen-api/issues/464#issuecomment-1577402883)
+Add this line to your application's `Gemfile`:
+
+```ruby
+gem 'typed_params'
+```
+
+And then execute:
+
+```bash
+$ bundle
+```
+
+Or install it yourself as:
+
+```bash
+$ gem install typed_params
+```
 
 ## Supported Rubies
 
-**`typed_parameters` supports Ruby 3.1 and above.** We encourage you to upgrade if you're
+**`typed_params` supports Ruby 3.1 and above.** We encourage you to upgrade if you're
 on an older version. Ruby 3 provides a lot of great features, like pattern matching and
 a new shorthand hash syntax.
 
 ## Documentation
 
-You can find the documentation on [RubyDoc](https://rubydoc.info/github/keygen-sh/typed_parameters).
+You can find the documentation on [RubyDoc](https://rubydoc.info/github/keygen-sh/typed_params).
 
 _We're working on improving the docs._
 
@@ -63,14 +79,14 @@ _We're working on improving the docs._
 
 ## Usage
 
-`typed_parameters` can be used to define a parameter schema per-action
+`typed_params` can be used to define a parameter schema per-action
 on controllers.
 
 To start, include the controller module:
 
 ```ruby
 class ApplicationController < ActionController::API
-  include TypedParameters::Controller
+  include TypedParams::Controller
 end
 ```
 
@@ -186,7 +202,7 @@ end
 
 By default, all root schemas are a [`:hash`](#hash-type) schema. This is because both
 `request.request_parameters` and `request.query_parameters` are hashes. Eventually,
-we'd like [to make that configurable](https://github.com/keygen-sh/typed_parameters/blob/67e9a34ce62c9cddbd2bd313e4e9f096f8744b83/lib/typed_parameters/controller.rb#L24-L27),
+we'd like [to make that configurable](https://github.com/keygen-sh/typed_params/blob/67e9a34ce62c9cddbd2bd313e4e9f096f8744b83/lib/typed_params/controller.rb#L24-L27),
 so that you could use a top-level array schema. You can create nested schemas via
 the [`:hash`](#hash-type) and [`:array`](#array-type) types.
 
@@ -222,7 +238,7 @@ end
 ### Configuration
 
 ```ruby
-TypedParameters.configure do |config|
+TypedParams.configure do |config|
   # Ignore nil params that are marked optional and non-nil in the schema.
   #
   # For example, given the following schema:
@@ -288,7 +304,7 @@ TypedParameters.configure do |config|
   #
   # With an invalid `child_key`, the path would be:
   #
-  #   rescue_from TypedParameters::UnpermittedParameterError, err -> {
+  #   rescue_from TypedParams::UnpermittedParameterError, err -> {
   #     puts err.path.to_s # => parentKey.childKey
   #   }
   #
@@ -299,7 +315,7 @@ end
 ### Unpermitted parameters
 
 By default, `.typed_params` is [`:strict`](#strict-parameter). This means that if any unpermitted parameters
-are provided, a `TypedParameters::UnpermittedParameterError` will be raised.
+are provided, a `TypedParams::UnpermittedParameterError` will be raised.
 
 For `.typed_query`, the default is non-strict. This means that any unpermitted parameters
 will be ignored.
@@ -308,13 +324,13 @@ You can rescue this error at the application-level like so:
 
 ```ruby
 class ApplicationController < ActionController::API
-  rescue_from TypedParameters::UnpermittedParameterError, err -> {
+  rescue_from TypedParams::UnpermittedParameterError, err -> {
     render_bad_request "unpermitted parameter: #{err.path.to_jsonapi_pointer}"
   }
 end
 ```
 
-The `TypedParameters::UnpermittedParameterError` error object has the following attributes:
+The `TypedParams::UnpermittedParameterError` error object has the following attributes:
 
 - `#message` - the error message, e.g. `unpermitted parameter`.
 - `#path` - a `Path` object with a pointer to the unpermitted parameter.
@@ -323,19 +339,19 @@ The `TypedParameters::UnpermittedParameterError` error object has the following 
 ### Invalid parameters
 
 When a parameter is provided, but it fails validation (e.g. a type mismatch), a
-`TypedParameters::InvalidParameterError` error will be raised.
+`TypedParams::InvalidParameterError` error will be raised.
 
 You can rescue this error at the application-level like so:
 
 ```ruby
 class ApplicationController < ActionController::API
-  rescue_from TypedParameters::InvalidParameterError, err -> {
+  rescue_from TypedParams::InvalidParameterError, err -> {
     render_bad_request "invalid parameter: #{err.message}", parameter: err.path.to_dot_notation
   }
 end
 ```
 
-The `TypedParameters::InvalidParameterError` error object has the following attributes:
+The `TypedParams::InvalidParameterError` error object has the following attributes:
 
 - `#message` - the error message, e.g. `type mismatch (received string expected integer)`.
 - `#path` - a `Path` object with a pointer to the invalid parameter.
@@ -387,7 +403,7 @@ This is required.
 
 #### Strict parameter
 
-When `true`, a `TypedParameters::UnpermittedParameterError` error is raised for
+When `true`, a `TypedParams::UnpermittedParameterError` error is raised for
 unpermitted parameters. When `false`, unpermitted parameters are ignored.
 
 ```ruby
@@ -449,7 +465,7 @@ By default, this is `false`.
 
 The parameter will be coerced if its type is coercible and the parameter has a
 type mismatch. The coercion can fail, e.g. `:integer` to `:hash`, and if it does,
-a `TypedParameters::InvalidParameterError` will be raised.
+a `TypedParams::InvalidParameterError` will be raised.
 
 ```ruby
 param :age, type: :integer, coerce: true
@@ -465,7 +481,7 @@ The parameter can be `#blank?`.
 param :title, type: :string, allow_blank: true
 ```
 
-By default, blank params are rejected with a `TypedParameters::InvalidParameterError`
+By default, blank params are rejected with a `TypedParams::InvalidParameterError`
 error.
 
 #### Allow nil
@@ -476,7 +492,7 @@ The parameter can be `#nil?`.
 param :tag, type: :string, allow_nil: true
 ```
 
-By default, nil params are rejected with a `TypedParameters::InvalidParameterError`
+By default, nil params are rejected with a `TypedParams::InvalidParameterError`
 error.
 
 #### Allow non-scalars
@@ -488,7 +504,7 @@ a `:hash` parameter. Scalar types can be found under [Types](#scalar-types).
 param :metadata, type: :hash, allow_non_scalars: true
 ```
 
-By default, non-scalar parameters are rejected with a `TypedParameters::InvalidParameterError`
+By default, non-scalar parameters are rejected with a `TypedParams::InvalidParameterError`
 error.
 
 #### Nilify blanks
@@ -568,7 +584,7 @@ param :user, type: :integer, validate: -> id {
 ```
 
 The lambda should accept a value and return a boolean. When the boolean
-evaluates to `false`, a `TypedParameters::InvalidParameterError` will
+evaluates to `false`, a `TypedParams::InvalidParameterError` will
 be raised.
 
 ### Shared options
@@ -681,10 +697,10 @@ param :non_scalars_too, type: :hash, allow_non_scalars: true
 You may register custom types that can be utilized in your schemas.
 
 Each type consists of, at minimum, a `match:` lambda. For more usage
-examples, see [the default types](https://github.com/keygen-sh/typed_parameters/tree/master/lib/typed_parameters/types).
+examples, see [the default types](https://github.com/keygen-sh/typed_params/tree/master/lib/typed_params/types).
 
 ```ruby
-TypedParameters.types.register(:metadata,
+TypedParams.types.register(:metadata,
   archetype: :hash,
   match: -> value {
     return false unless
@@ -713,7 +729,7 @@ TypedParameters.types.register(:metadata,
 
 If you have an idea, or have discovered a bug, please open an issue or create a pull request.
 
-For security issues, please see [`SECURITY.md`](https://github.com/keygen-sh/typed_parameters/blob/master/SECURITY.md)
+For security issues, please see [`SECURITY.md`](https://github.com/keygen-sh/typed_params/blob/master/SECURITY.md)
 
 ## License
 
