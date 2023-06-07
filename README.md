@@ -225,7 +225,7 @@ end
 
 By default, all root schemas are a [`:hash`](#hash-type) schema. This is because both
 `request.request_parameters` and `request.query_parameters` are hashes. Eventually,
-we'd like [to make that configurable](https://github.com/keygen-sh/typed_params/blob/67e9a34ce62c9cddbd2bd313e4e9f096f8744b83/lib/typed_params/controller.rb#L24-L27),
+we'd like [to make that configurable](https://github.com/keygen-sh/typed_params/blob/67e9a34ce62c9cddbd2bd313e4e9f096f8744b83/lib/typed_parameters/controller.rb#L24-L27),
 so that you could use a top-level array schema. You can create nested schemas via
 the [`:hash`](#hash-type) and [`:array`](#array-type) types.
 
