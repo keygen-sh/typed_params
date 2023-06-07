@@ -754,6 +754,14 @@ run after all validations and transforms, formatting the params from
 
 You can add convenient support for JSONAPI by using the `:jsonapi` format.
 
+All request `data` will be transformed into a hash, useable within models.
+
+In addition, request `meta` will be available inside of the controller
+action with the following methods:
+
+- `#{controller_name.singularize}_meta`
+- `#typed_meta`
+
 ```ruby
 class UsersController < ApplicationController
   typed_params {
@@ -777,6 +785,10 @@ class UsersController < ApplicationController
         end
       end
     end
+
+    param :meta, type: :hash, optional: true do
+      param :affilate_id, type: :string, optional: true
+    end
   }
   def create
     puts user_params
@@ -787,6 +799,9 @@ class UsersController < ApplicationController
     #      password: '7c84241a1102',
     #      team_id: '1',
     #    }
+
+    puts user_meta
+    # => { affilate_id: 'e805' }
   end
 end
 ```
