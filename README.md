@@ -34,6 +34,7 @@ Links:
   - [Scalar types](#scalar-types)
   - [Non-scalar types](#non-scalar-types)
   - [Custom types](#custom-types)
+  - [Formats](#formats)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -719,6 +720,83 @@ TypedParams.types.register(:metadata,
     }
   },
 )
+```
+
+### Formats
+
+Out of the box, `typed_params` ships with 2 formatters. Formatters are
+run after all validations and transforms, formatting the params from
+1 format to another format.
+
+#### JSONAPI format
+
+You can add convenient support for JSONAPI by using the `:jsonapi` format.
+
+```ruby
+class UsersController < ApplicationController
+  typed_params {
+    format :jsonapi
+
+    param :data, type: :hash do
+      param :type, type: :string, inclusion: { in: %w[users user] }, noop: true
+      param :id, type: :string, noop: true
+      param :attributes, type: :hash do
+        param :first_name, type: :string, optional: true
+        param :last_name, type: :string, optional: true
+        param :email, type: :string, format: { with: /@/ }
+        param :password, type: :string
+      end
+      param :relationships, type: :hash do
+        param :team, type: :hash do
+          param :data, type: :hash do
+            param :type, type: :string, inclusion: { in: %w[teams team] }
+            param :id, type: :string
+          end
+        end
+      end
+    end
+  }
+  def create
+    puts user_params
+    # => {
+    #      first_name: 'John',
+    #      last_name: 'Smith',
+    #      email: 'json@smith.example',
+    #      password: '7c84241a1102',
+    #      team_id: '1',
+    #    }
+  end
+end
+```
+
+#### Rails format
+
+You can add conventional wrapped params using the `:rails` format.
+
+```ruby
+class UsersController < ApplicationController
+  typed_params {
+    format :rails
+
+    param :first_name, type: :string, optional: true
+    param :last_name, type: :string, optional: true
+    param :email, type: :string, format: { with: /@/ }
+    param :password, type: :string
+    param :team_id, type: :string
+  }
+  def create
+    puts user_params
+    # => {
+    #      user: {
+    #        first_name: 'John',
+    #        last_name: 'Smith',
+    #        email: 'json@smith.example',
+    #        password: '7c84241a1102',
+    #        team_id: '1',
+    #      }
+    #    }
+  end
+end
 ```
 
 ## Is it any good?
