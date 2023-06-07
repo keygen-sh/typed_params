@@ -10,6 +10,28 @@ parameter schemas for Rails APIs.
 This gem was extracted from [Keygen](https://keygen.sh) and is being used in production
 to serve millions of API requests per day.
 
+```ruby
+class UsersController < ApplicationController
+  include TypedParams::Controller
+
+  typed_params {
+    param :first_name, type: :string, optional: true
+    param :last_name, type: :string, optional: true
+    param :email, type: :string
+    param :password, type: :string
+  }
+  def create
+    user = User.new(user_params)
+
+    if user.save
+      render_created user, location: v1_user_url(user)
+    else
+      render_unprocessable_resource user
+    end
+  end
+end
+```
+
 Sponsored by:
 
 [![Keygen logo](https://github.com/keygen-sh/typed_params/assets/6979737/f2947915-2956-4415-a9c0-5411c388ea96)](https://keygen.sh)
