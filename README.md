@@ -545,7 +545,7 @@ By default, this is disabled.
 The parameter must be included in the array or range.
 
 ```ruby
-param :log_level, type: :string,  inclusion: { in: %w[DEBUG INFO WARN ERROR FATAL] }
+param :log_level, type: :string, inclusion: { in: %w[DEBUG INFO WARN ERROR FATAL] }
 param :priority, type: :integer, inclusion: { in: 0..9 }
 ```
 
@@ -554,7 +554,7 @@ param :priority, type: :integer, inclusion: { in: 0..9 }
 The parameter must be excluded from the array or range.
 
 ```ruby
-param :custom_log_level, type: :string,  exclusion: { in: %w[DEBUG INFO WARN ERROR FATAL] }
+param :custom_log_level, type: :string, exclusion: { in: %w[DEBUG INFO WARN ERROR FATAL] }
 param :custom_priority, type: :integer, exclusion: { in: 0..9 }
 ```
 
