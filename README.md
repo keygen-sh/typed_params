@@ -391,7 +391,7 @@ Parameters can have validations, transforms, and more.
 - [`:if` and `:unless`](#conditional-parameter)
 - [`:as`](#rename-parameter)
 - [`:noop`](#noop-parameter)
-- [`:coerce`](#coerced-parameter)
+- [`:coerce`](#coerce-parameter)
 - [`:allow_blank`](#allow-blank)
 - [`:allow_nil`](#allow-nil)
 - [`:allow_non_scalars`](#allow-non-scalars)
@@ -484,7 +484,7 @@ param :foo, type: :string, noop: true
 
 By default, this is `false`.
 
-#### Coerced parameter
+#### Coerce parameter
 
 The parameter will be coerced if its type is coercible and the parameter has a
 type mismatch. The coercion can fail, e.g. `:integer` to `:hash`, and if it does,
