@@ -31,6 +31,22 @@ RSpec.describe TypedParams::Parameterizer do
     }
   end
 
+  it 'should parameterize array with nil child' do
+    schema = TypedParams::Schema.new(type: :array) { items(type: :hash) { param(:key, type: :symbol) } }
+    paramz = TypedParams::Parameterizer.new(schema:)
+    params = [nil]
+
+    expect(paramz.call(value: params)).to satisfy { |res|
+      res in TypedParams::Parameter(
+        value: [
+          TypedParams::Parameter(
+            value: nil,
+          ),
+        ],
+      )
+    }
+  end
+
   it 'should parameterize hash' do
     schema = TypedParams::Schema.new(type: :hash) { param(:foo, type: :hash) { param(:bar, type: :symbol) } }
     paramz = TypedParams::Parameterizer.new(schema:)
@@ -43,6 +59,22 @@ RSpec.describe TypedParams::Parameterizer do
             value: {
               bar: TypedParams::Parameter(value: :baz),
             },
+          ),
+        },
+      )
+    }
+  end
+
+  it 'should parameterize hash with nil child' do
+    schema = TypedParams::Schema.new(type: :hash) { param(:foo, type: :hash) { param(:bar, type: :symbol) } }
+    paramz = TypedParams::Parameterizer.new(schema:)
+    params = { foo: nil }
+
+    expect(paramz.call(value: params)).to satisfy { |res|
+      res in TypedParams::Parameter(
+        value: {
+          foo: TypedParams::Parameter(
+            value: nil,
           ),
         },
       )
