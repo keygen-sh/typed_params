@@ -31,9 +31,6 @@ module TypedParams
                 :parent
 
     def parameterize_array_schema(key:, value:)
-      return parameterize_value(key:, value:) unless
-        value.is_a?(Array)
-
       param = Parameter.new(key:, value: [], schema:, parent:)
 
       value.each_with_index do |v, i|
@@ -56,9 +53,6 @@ module TypedParams
     end
 
     def parameterize_hash_schema(key:, value:)
-      return parameterize_value(key:, value:) unless
-        value.is_a?(Hash)
-
       param = Parameter.new(key:, value: {}, schema:, parent:)
 
       value.each do |k, v|
