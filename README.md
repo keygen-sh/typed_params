@@ -348,7 +348,7 @@ end
 When a parameter is provided, but it fails validation (e.g. a type mismatch), a
 `TypedParams::InvalidParameterError` error will be raised.
 
-You can rescue this error at the application-level like so:
+You can rescue this error at the controller-level like so:
 
 ```ruby
 class ApplicationController < ActionController::API
@@ -372,7 +372,7 @@ are provided, a `TypedParams::UnpermittedParameterError` will be raised.
 For `.typed_query`, the default is non-strict. This means that any unpermitted parameters
 will be ignored.
 
-You can rescue this error at the application-level like so:
+You can rescue this error at the controller-level like so:
 
 ```ruby
 class ApplicationController < ActionController::API
