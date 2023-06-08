@@ -109,7 +109,7 @@ module TypedParams
     class_methods do
       def typed_params(on: nil, schema: nil, format: nil, **kwargs, &)
         schema = case schema
-                 in Array(Symbol, Symbol) => namespace, key
+                 in Array(Symbol => namespace, Symbol => key)
                    typed_schemas[namespace, key] || raise(ArgumentError, "schema does not exist: #{namespace.inspect}/#{key.inspect}")
                  in Symbol => key
                    typed_schemas[self, key] || raise(ArgumentError, "schema does not exist: #{key.inspect}")
@@ -131,7 +131,7 @@ module TypedParams
 
       def typed_query(on: nil, schema: nil, **kwargs, &)
         schema = case schema
-                 in Array(Symbol, Symbol) => namespace, key
+                 in Array(Symbol => namespace, Symbol => key)
                    typed_schemas[namespace, key] || raise(ArgumentError, "schema does not exist: #{namespace.inspect}/#{key.inspect}")
                  in Symbol => key
                    typed_schemas[self, key] || raise(ArgumentError, "schema does not exist: #{key.inspect}")

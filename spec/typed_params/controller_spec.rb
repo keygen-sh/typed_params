@@ -406,6 +406,47 @@ RSpec.describe 'controller', type: :controller do
     end
   end
 
+  context 'with namespaced schema' do
+    module self::V1; end
+    module self::V2; end
+
+    class self::ApplicationController < ActionController::Base
+      include TypedParams::Controller
+    end
+
+    class self::V1::UsersController < self::ApplicationController
+      typed_schema :user, namespace: :v1 do
+        param :first_name, type: :string, optional: true
+        param :last_name, type: :string, optional: true
+        param :email, type: :string
+        param :password, type: :string
+      end
+    end
+
+    class self::V2::UsersController < self::ApplicationController
+      typed_params schema: %i[v1 user]
+      def create = render json: typed_params
+    end
+
+    controller self::V2::UsersController do
+    end
+
+    it 'should be a valid schema' do
+      user = {
+        first_name: 'Jane',
+        email: 'jane@doe.example',
+        password: SecureRandom.hex,
+      }
+
+      post :create, params: user
+
+      body = JSON.parse(response.body, symbolize_names: true)
+
+      # FIXME(ezekg) Use rails-controller-testing gem for assigns[]?
+      expect(body).to eq user
+    end
+  end
+
   context 'with key casing' do
     controller do
       include TypedParams::Controller

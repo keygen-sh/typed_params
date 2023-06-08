@@ -266,6 +266,16 @@ class PostsController < ApplicationController
 end
 ```
 
+Named schemas can have an optional `:namespace` as well.
+
+```ruby
+typed_schema :post, namespace: :v1 do
+  param :title, type: :string, length: { within: 10..80 }
+  param :content, type: :string, length: { minimum: 100 }
+  param :author_id, type: :integer
+end
+```
+
 ### Configuration
 
 ```ruby
