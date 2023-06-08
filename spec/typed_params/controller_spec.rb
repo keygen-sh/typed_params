@@ -132,6 +132,10 @@ RSpec.describe TypedParams::Controller do
     describe '#typed_query' do
       it('should respond') { expect(subject.new).to respond_to :typed_query }
     end
+
+    describe '#x_query' do
+      it('should respond') { expect(subject.new).to respond_to :user_query }
+    end
   end
 
   context 'with inheritance' do
@@ -169,6 +173,11 @@ RSpec.describe TypedParams::Controller do
 
     describe '#typed_query' do
       it('should respond') { expect(subject.new).to respond_to :typed_query }
+    end
+
+    describe '#x_query' do
+      it('should not respond') { expect(subject.new).to_not respond_to :base_query }
+      it('should respond') { expect(subject.new).to respond_to :user_query }
     end
   end
 end
