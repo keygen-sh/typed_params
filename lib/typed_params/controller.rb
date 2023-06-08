@@ -71,8 +71,6 @@ module TypedParams
 
       private
 
-      def typed_namespace = self.class
-
       def respond_to_missing?(method_name, *)
         return super unless
           /_(params|query)\z/.match?(method_name)
