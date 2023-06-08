@@ -362,7 +362,8 @@ The `TypedParams::InvalidParameterError` error object has the following attribut
 
 - `#message` - the error message, e.g. `type mismatch (received string expected integer)`.
 - `#path` - a `Path` object with a pointer to the invalid parameter.
-- `#source` - either `:params` or `:query`, depending on where the invalid parameter came from (i.e. request body vs URL, respectively).
+- `#source` - either `:params` or `:query`, depending on where the invalid parameter came
+  from (i.e. request body vs query parameters, respectively).
 
 ### Unpermitted parameters
 
@@ -387,7 +388,8 @@ The `TypedParams::UnpermittedParameterError` error object has the following attr
 
 - `#message` - the error message, e.g. `unpermitted parameter`.
 - `#path` - a `Path` object with a pointer to the unpermitted parameter.
-- `#source` - either `:params` or `:query`, depending on where the unpermitted parameter came from (i.e. request body vs URL, respectively).
+- `#source` - either `:params` or `:query`, depending on where the unpermitted parameter came
+  from (i.e. request body vs query parameters, respectively).
 
 It inherits from [`TypedParams::InvalidParameterError`](#invalid-parameters).
 
