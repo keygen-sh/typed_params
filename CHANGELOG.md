@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Fix parameterization of nil children.
+
 ## 1.0.1
 
 - Fix namespaced schemas.
