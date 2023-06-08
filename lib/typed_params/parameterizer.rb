@@ -31,8 +31,8 @@ module TypedParams
                 :parent
 
     def parameterize_array_schema(key:, value:)
-      return parameterize_value(key:, value:) if
-        value.nil?
+      return parameterize_value(key:, value:) unless
+        value.is_a?(Array)
 
       param = Parameter.new(key:, value: [], schema:, parent:)
 
@@ -56,8 +56,8 @@ module TypedParams
     end
 
     def parameterize_hash_schema(key:, value:)
-      return parameterize_value(key:, value:) if
-        value.nil?
+      return parameterize_value(key:, value:) unless
+        value.is_a?(Hash)
 
       param = Parameter.new(key:, value: {}, schema:, parent:)
 
