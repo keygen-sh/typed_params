@@ -14,6 +14,10 @@ to serve millions of API requests per day.
 class UsersController < ApplicationController
   include TypedParams::Controller
 
+  rescue_from TypedParams::InvalidParameterError, -> err {
+    render_bad_request err.message, source: err.path.to_s
+  }
+
   typed_params {
     param :first_name, type: :string, optional: true
     param :last_name, type: :string, optional: true
@@ -110,6 +114,10 @@ To start, include the controller module:
 ```ruby
 class ApplicationController < ActionController::API
   include TypedParams::Controller
+
+  rescue_from TypedParams::InvalidParameterError, -> err {
+    render_bad_request err.message, source: err.path.to_s
+  }
 end
 ```
 
@@ -327,7 +335,7 @@ TypedParams.configure do |config|
   #
   # With an invalid `child_key`, the path would be:
   #
-  #   rescue_from TypedParams::UnpermittedParameterError, err -> {
+  #   rescue_from TypedParams::UnpermittedParameterError, -> err {
   #     puts err.path.to_s # => parentKey.childKey
   #   }
   #
@@ -347,7 +355,7 @@ You can rescue this error at the application-level like so:
 
 ```ruby
 class ApplicationController < ActionController::API
-  rescue_from TypedParams::UnpermittedParameterError, err -> {
+  rescue_from TypedParams::UnpermittedParameterError, -> err {
     render_bad_request "unpermitted parameter: #{err.path.to_jsonapi_pointer}"
   }
 end
@@ -368,7 +376,7 @@ You can rescue this error at the application-level like so:
 
 ```ruby
 class ApplicationController < ActionController::API
-  rescue_from TypedParams::InvalidParameterError, err -> {
+  rescue_from TypedParams::InvalidParameterError, -> err {
     render_bad_request "invalid parameter: #{err.message}", parameter: err.path.to_dot_notation
   }
 end
