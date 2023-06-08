@@ -134,7 +134,7 @@ RSpec.describe TypedParams::Controller do
     end
   end
 
-  context 'with inhertiance' do
+  context 'with inheritance' do
     subject {
       parent = Class.new ActionController::Base do
         @controller_name = 'base'
