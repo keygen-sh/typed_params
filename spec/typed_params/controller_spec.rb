@@ -364,6 +364,39 @@ RSpec.describe 'controller', type: :controller do
     end
   end
 
+  context 'with inherited schema' do
+    class self::ApplicationController < ActionController::Base
+      include TypedParams::Controller
+
+      typed_schema :user do
+        param :first_name, type: :string, optional: true
+        param :last_name, type: :string, optional: true
+        param :email, type: :string
+        param :password, type: :string
+      end
+    end
+
+    controller self::ApplicationController do
+      typed_params schema: :user
+      def create = render json: typed_params
+    end
+
+    it 'should be a valid schema' do
+      user = {
+        first_name: 'Jane',
+        email: 'jane@doe.example',
+        password: SecureRandom.hex,
+      }
+
+      post :create, params: user
+
+      body = JSON.parse(response.body, symbolize_names: true)
+
+      # FIXME(ezekg) Use rails-controller-testing gem for assigns[]?
+      expect(body).to eq user
+    end
+  end
+
   context 'with key casing' do
     controller do
       include TypedParams::Controller
