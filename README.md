@@ -53,8 +53,8 @@ Links:
   - [Defining schemas](#defining-schemas)
   - [Shared schemas](#shared-schemas)
   - [Configuration](#configuration)
-  - [Unpermitted parameters](#unpermitted-parameters)
   - [Invalid parameters](#invalid-parameters)
+  - [Unpermitted parameters](#unpermitted-parameters)
   - [Parameter options](#parameter-options)
   - [Shared options](#shared-options)
   - [Scalar types](#scalar-types)
@@ -343,30 +343,6 @@ TypedParams.configure do |config|
 end
 ```
 
-### Unpermitted parameters
-
-By default, `.typed_params` is [`:strict`](#strict-parameter). This means that if any unpermitted parameters
-are provided, a `TypedParams::UnpermittedParameterError` will be raised.
-
-For `.typed_query`, the default is non-strict. This means that any unpermitted parameters
-will be ignored.
-
-You can rescue this error at the application-level like so:
-
-```ruby
-class ApplicationController < ActionController::API
-  rescue_from TypedParams::UnpermittedParameterError, -> err {
-    render_bad_request "unpermitted parameter: #{err.path.to_jsonapi_pointer}"
-  }
-end
-```
-
-The `TypedParams::UnpermittedParameterError` error object has the following attributes:
-
-- `#message` - the error message, e.g. `unpermitted parameter`.
-- `#path` - a `Path` object with a pointer to the unpermitted parameter.
-- `#source` - either `:params` or `:query`, depending on where the unpermitted parameter came from (i.e. request body vs URL, respectively).
-
 ### Invalid parameters
 
 When a parameter is provided, but it fails validation (e.g. a type mismatch), a
@@ -387,6 +363,33 @@ The `TypedParams::InvalidParameterError` error object has the following attribut
 - `#message` - the error message, e.g. `type mismatch (received string expected integer)`.
 - `#path` - a `Path` object with a pointer to the invalid parameter.
 - `#source` - either `:params` or `:query`, depending on where the invalid parameter came from (i.e. request body vs URL, respectively).
+
+### Unpermitted parameters
+
+By default, `.typed_params` is [`:strict`](#strict-parameter). This means that if any unpermitted parameters
+are provided, a `TypedParams::UnpermittedParameterError` will be raised.
+
+For `.typed_query`, the default is non-strict. This means that any unpermitted parameters
+will be ignored.
+
+You can rescue this error at the application-level like so:
+
+```ruby
+class ApplicationController < ActionController::API
+  # NOTE: Should be rescued before TypedParams::InvalidParameterError
+  rescue_from TypedParams::UnpermittedParameterError, -> err {
+    render_bad_request "unpermitted parameter: #{err.path.to_jsonapi_pointer}"
+  }
+end
+```
+
+The `TypedParams::UnpermittedParameterError` error object has the following attributes:
+
+- `#message` - the error message, e.g. `unpermitted parameter`.
+- `#path` - a `Path` object with a pointer to the unpermitted parameter.
+- `#source` - either `:params` or `:query`, depending on where the unpermitted parameter came from (i.e. request body vs URL, respectively).
+
+It inherits from [`TypedParams::InvalidParameterError`](#invalid-parameters).
 
 ### Parameter options
 
