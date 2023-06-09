@@ -38,9 +38,15 @@ end
 
 Sponsored by:
 
-[![Keygen logo](https://github.com/keygen-sh/typed_params/assets/6979737/f2947915-2956-4415-a9c0-5411c388ea96)](https://keygen.sh)
+<a href="https://keygen.sh?ref=typed_params">
+  <div>
+    <img src="https://keygen.sh/images/logo-pill.png" width="200" alt="Keygen">
+  </div>
+</a>
 
 _An open, source-available software licensing and distribution API._
+
+__
 
 Links:
 
