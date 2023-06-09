@@ -53,6 +53,16 @@ RSpec.describe TypedParams::Schema do
     it 'should not raise when defining an item' do
       expect { TypedParams::Schema.new(type: :array) { item type: :string } }.to_not raise_error
     end
+
+    it 'should raise on boundless index conflict' do
+      expect { TypedParams::Schema.new(type: :array) { items type: :string; item type: :string } }
+        .to raise_error ArgumentError
+    end
+
+    it 'should raise on bounded index conflict' do
+      expect { TypedParams::Schema.new(type: :array) { item type: :string; items type: :string } }
+        .to raise_error ArgumentError
+    end
   end
 
   context 'with :hash type' do
