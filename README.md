@@ -58,6 +58,7 @@ Links:
   - [Query schemas](#query-schemas)
   - [Defining schemas](#defining-schemas)
   - [Shared schemas](#shared-schemas)
+  - [Namespaced schemas](#namespaced-schemas)
   - [Configuration](#configuration)
   - [Invalid parameters](#invalid-parameters)
   - [Unpermitted parameters](#unpermitted-parameters)
@@ -272,13 +273,28 @@ class PostsController < ApplicationController
 end
 ```
 
-Named schemas can have an optional `:namespace` as well.
+### Namespaced schemas
+
+Schemas can have an optional `:namespace`. This can be especially useful when
+defining and sharing schemas across multiple versions of an API.
 
 ```ruby
-typed_schema :post, namespace: :v1 do
-  param :title, type: :string, length: { within: 10..80 }
-  param :content, type: :string, length: { minimum: 100 }
-  param :author_id, type: :integer
+class PostsController < ApplicationController
+  typed_schema :post, namespace: :v1 do
+    param :title, type: :string, length: { within: 10..80 }
+    param :content, type: :string, length: { minimum: 100 }
+    param :author_id, type: :integer
+  end
+
+  typed_params schema: %i[v1 post]
+  def create
+    # ...
+  end
+
+  typed_params schema: %i[v1 post]
+  def update
+    # ...
+  end
 end
 ```
 
