@@ -643,9 +643,18 @@ The lambda must return a tuple with the new key and value.
 #### Validate parameter
 
 Define a custom validation for the parameter, outside of the default
-validations.
+validations. The can be useful for defining mutually exclusive params,
+or even validating that an ID exists before proceeding.
 
 ```ruby
+# Mutually exclusive params (i.e. either-or, not both)
+param :login, type: :hash, validate: -> v { v.key?(:username) ^ v.key?(:email) } do
+  param :username, type: :string, optional: true
+  param :email, type: :string, optional: true
+  param :password, type: :string
+end
+
+# Assert user exists
 param :user, type: :integer, validate: -> id {
   User.exists?(id)
 }
@@ -654,6 +663,15 @@ param :user, type: :integer, validate: -> id {
 The lambda should accept a value and return a boolean. When the boolean
 evaluates to `false`, a `TypedParams::InvalidParameterError` will
 be raised.
+
+To customize the error message, the lambda can raise a `TypedParams::ValidationError`
+error:
+
+```ruby
+param :invalid, type: :string, validate: -> v {
+  raise TypedParams::ValidationError, 'is always invalid'
+}
+```
 
 ### Shared options
 
