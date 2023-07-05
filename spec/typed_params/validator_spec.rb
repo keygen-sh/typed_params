@@ -308,6 +308,32 @@ RSpec.describe TypedParams::Validator do
     expect { validator.call(params) }.to raise_error TypedParams::InvalidParameterError
   end
 
+  it 'should raise on mutually exclusive :validate validation' do
+    schema = TypedParams::Schema.new(type: :hash, validate: -> v { v.key?(:foo) ^ v.key?(:bar) }) do
+      param :foo, type: :integer, optional: true
+      param :bar, type: :integer, optional: true
+      param :baz, type: :integer
+    end
+
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: 1, bar: 2, baz: 3 })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error TypedParams::InvalidParameterError
+  end
+
+  it 'should not raise on mutually exclusive :validate validation' do
+    schema = TypedParams::Schema.new(type: :hash, validate: -> v { v.key?(:foo) ^ v.key?(:bar) }) do
+      param :foo, type: :integer, optional: true
+      param :bar, type: :integer, optional: true
+      param :baz, type: :integer
+    end
+
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: 1, baz: 3 })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to_not raise_error
+  end
+
   it 'should not raise on hash of scalar values' do
     schema    = TypedParams::Schema.new(type: :hash)
     params    = TypedParams::Parameterizer.new(schema:).call(value: { a: 1, b: 2, c: 3 })
