@@ -334,6 +334,17 @@ RSpec.describe TypedParams::Validator do
     expect { validator.call(params) }.to_not raise_error
   end
 
+  it 'should raise with a custom error message for :validate validation' do
+    schema    = TypedParams::Schema.new(type: :hash) { param :foo, type: :string, validate: -> v { raise TypedParams::ValidationError, 'foo' } }
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: 'bar' })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error { |err|
+      expect(err).to be_a TypedParams::InvalidParameterError
+      expect(err.message).to eq 'foo'
+    }
+  end
+
   it 'should not raise on hash of scalar values' do
     schema    = TypedParams::Schema.new(type: :hash)
     params    = TypedParams::Parameterizer.new(schema:).call(value: { a: 1, b: 2, c: 3 })
