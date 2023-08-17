@@ -34,7 +34,7 @@ module TypedParams
                               end
 
           klass.singleton_class.send(:alias_method, :"unmemoized_#{method_name}", method_name)
-          klass.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+          klass.class_eval <<~RUBY, __FILE__, __LINE__ + 1
             def self.#{method_name}(*args, **kwargs, &block)
               key = args.hash ^ kwargs.hash ^ block.hash
 
@@ -72,7 +72,7 @@ module TypedParams
                               end
 
           klass.alias_method :"unmemoized_#{method_name}", method_name
-          klass.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+          klass.class_eval <<~RUBY, __FILE__, __LINE__ + 1
             def #{method_name}(*args, **kwargs, &block)
               key = args.hash ^ kwargs.hash ^ block.hash
 
