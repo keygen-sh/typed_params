@@ -3,15 +3,19 @@
 require 'typed_params/handler'
 require 'typed_params/handler_set'
 require 'typed_params/schema_set'
+require 'typed_params/memoize'
 
 module TypedParams
   module Controller
     extend ActiveSupport::Concern
 
     included do
+      include Memoize
+
       cattr_accessor :typed_handlers, default: HandlerSet.new
       cattr_accessor :typed_schemas,  default: SchemaSet.new
 
+      memoize
       def typed_params(format: AUTO)
         handler = typed_handlers.params[self.class, action_name.to_sym]
 
@@ -42,6 +46,7 @@ module TypedParams
         )
       end
 
+      memoize
       def typed_query(format: AUTO)
         handler = typed_handlers.query[self.class, action_name.to_sym]
 

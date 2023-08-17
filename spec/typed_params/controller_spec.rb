@@ -472,4 +472,26 @@ RSpec.describe 'controller', type: :controller do
       expect(body).to eq parent_key: { child_key: 'value' }
     end
   end
+
+  context 'with caching' do
+    controller do
+      include TypedParams::Controller
+
+      typed_params { param :hex, type: :string }
+      def create = render json: [typed_params, typed_params]
+    end
+
+    it 'should cache params' do
+      expect(TypedParams::Processor).to receive(:new).exactly(3).times.and_call_original
+
+      post :create, params: { hex: a = SecureRandom.hex }
+      expect(response.body).to include a
+
+      post :create, params: { hex: b = SecureRandom.hex }
+      expect(response.body).to include b
+
+      post :create, params: { hex: c = SecureRandom.hex }
+      expect(response.body).to include c
+    end
+  end
 end
