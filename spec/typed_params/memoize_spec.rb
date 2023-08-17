@@ -4,6 +4,118 @@ require 'spec_helper'
 
 RSpec.describe TypedParams::Memoize do
   describe '.memoize' do
+    it 'memoizes' do
+      a = Class.new {
+        include TypedParams::Memoize
+
+        memoize
+        def without_args = SecureRandom.hex
+      }.new
+
+      expect(a).to receive(:without_args).twice.and_call_original
+      expect(a).to receive(:unmemoized_without_args).once
+
+      a.without_args
+      a.without_args
+    end
+
+    it 'memoizes args' do
+      a = Class.new {
+        include TypedParams::Memoize
+
+        memoize
+        def with_args(n) = SecureRandom.hex(n)
+      }.new
+
+      expect(a).to receive(:with_args).twice.and_call_original
+      expect(a).to receive(:unmemoized_with_args).once
+
+      a.with_args(64)
+      a.with_args(64)
+    end
+
+    it 'memoizes kwargs' do
+      a = Class.new {
+        include TypedParams::Memoize
+
+        memoize
+        def with_kwargs(n:) = SecureRandom.hex(n)
+      }.new
+
+      expect(a).to receive(:with_kwargs).twice.and_call_original
+      expect(a).to receive(:unmemoized_with_kwargs).once
+
+      a.with_kwargs(n: 64)
+      a.with_kwargs(n: 64)
+    end
+
+    it 'memoizes block' do
+      a = Class.new {
+        include TypedParams::Memoize
+
+        memoize
+        def with_block(&b) = SecureRandom.hex(b.call)
+      }.new
+
+      expect(a).to receive(:with_block).twice.and_call_original
+      expect(a).to receive(:unmemoized_with_block).once
+
+      a.with_block &b = -> { 64 }
+      a.with_block &b
+    end
+
+    it 'should raise on repeat instance method memoize' do
+      expect {
+        Class.new {
+          include TypedParams::Memoize
+
+          memoize
+          memoize
+          def call = nil
+        }
+      }.to raise_error RuntimeError
+    end
+
+    it 'should raise on repeat instance method def' do
+      expect {
+        Class.new {
+          include TypedParams::Memoize
+
+          memoize
+          def call = nil
+
+          memoize
+          def call = nil
+        }
+      }.to raise_error RuntimeError
+    end
+
+    it 'should raise on repeat class method memoize' do
+      expect {
+        Class.new {
+          include TypedParams::Memoize
+
+          memoize
+          memoize
+          def self.call = nil
+        }
+      }.to raise_error RuntimeError
+    end
+
+    it 'should raise on repeat class method def' do
+      expect {
+        Class.new {
+          include TypedParams::Memoize
+
+          memoize
+          def self.call = nil
+
+          memoize
+          def self.call = nil
+        }
+      }.to raise_error RuntimeError
+    end
+
     context 'with public instance method' do
       subject {
         Class.new {
@@ -340,58 +452,6 @@ RSpec.describe TypedParams::Memoize do
 
         expect(x).to_not eq y
       end
-    end
-
-    it 'should raise on repeat instance method memoize' do
-      expect {
-        Class.new {
-          include TypedParams::Memoize
-
-          memoize
-          memoize
-          def call = nil
-        }
-      }.to raise_error RuntimeError
-    end
-
-    it 'should raise on repeat instance method def' do
-      expect {
-        Class.new {
-          include TypedParams::Memoize
-
-          memoize
-          def call = nil
-
-          memoize
-          def call = nil
-        }
-      }.to raise_error RuntimeError
-    end
-
-    it 'should raise on repeat class method memoize' do
-      expect {
-        Class.new {
-          include TypedParams::Memoize
-
-          memoize
-          memoize
-          def self.call = nil
-        }
-      }.to raise_error RuntimeError
-    end
-
-    it 'should raise on repeat class method def' do
-      expect {
-        Class.new {
-          include TypedParams::Memoize
-
-          memoize
-          def self.call = nil
-
-          memoize
-          def self.call = nil
-        }
-      }.to raise_error RuntimeError
     end
   end
 end
