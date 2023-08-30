@@ -110,6 +110,7 @@ _We're working on improving the docs._
 - Reuse schemas across controllers by defining named schemas.
 - Run validations on params, similar to active model validations.
 - Run transforms on params before they hit your controller.
+- Support formatters such as JSON:API.
 
 ## Usage
 
