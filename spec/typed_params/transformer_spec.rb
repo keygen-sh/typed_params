@@ -191,6 +191,24 @@ RSpec.describe TypedParams::Transformer do
     expect(params[:bar].value).to be 'baz'
   end
 
+  it 'should rename multiple aliased params' do
+    schema = TypedParams::Schema.new type: :hash do
+      param :foo, type: :integer, as: :qux
+      param :bar, type: :integer, as: :qux
+      param :baz, type: :integer, as: :qux
+    end
+
+    params      = TypedParams::Parameterizer.new(schema:).call(value: { foo: 1, bar: 2 })
+    transformer = TypedParams::Transformer.new(schema:)
+
+    transformer.call(params)
+
+    expect(params[:foo]).to be nil
+    expect(params[:bar]).to be nil
+    expect(params[:baz]).to be nil
+    expect(params[:qux].value).to be 2
+  end
+
   context 'with config to not ignore optional nils' do
     before do
       @ignore_nil_optionals = TypedParams.config.ignore_nil_optionals
