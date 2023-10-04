@@ -198,7 +198,7 @@ RSpec.describe TypedParams::Transformer do
       param :baz, type: :integer, as: :qux
     end
 
-    params      = TypedParams::Parameterizer.new(schema:).call(value: { foo: 1, bar: 2 })
+    params      = TypedParams::Parameterizer.new(schema:).call(value: { bar: 2, foo: 1 })
     transformer = TypedParams::Transformer.new(schema:)
 
     transformer.call(params)
