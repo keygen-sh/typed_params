@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0
+
+- Add memoization to `#typed_params` and `#typed_query` methods.
+
 ## 1.0.3
 
 - Revert 0b0aaa6b66edd3e4c3336e51fa340592e7ef9e86.
