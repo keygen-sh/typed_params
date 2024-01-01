@@ -47,7 +47,7 @@ module TypedParams
     #   │ 1 ││ 2 │     │ 5 │
     #   └───┘└───┘     └───┘
     #
-    def depth_first_map(param, &)
+    def depth_first_map(param, &block)
       return if param.nil?
 
       # Postorder DFS, so we'll visit the children first.
@@ -55,12 +55,12 @@ module TypedParams
         case param.schema.children
         in Array if param.array?
           if param.schema.indexed?
-            param.schema.children.each_with_index { |v, i| self.class.call(param[i], schema: v, controller:, &) }
+            param.schema.children.each_with_index { |v, i| self.class.call(param[i], schema: v, controller:, &block) }
           else
-            param.value.each { |v| self.class.call(v, schema: param.schema.children.first, controller:, &) }
+            param.value.each { |v| self.class.call(v, schema: param.schema.children.first, controller:, &block) }
           end
         in Hash if param.hash?
-          param.schema.children.each { |k, v| self.class.call(param[k], schema: v, controller:, &) }
+          param.schema.children.each { |k, v| self.class.call(param[k], schema: v, controller:, &block) }
         else
         end
       end

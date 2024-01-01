@@ -211,7 +211,7 @@ module TypedParams
 
     ##
     # params defines multiple like-parameters for a hash schema.
-    def params(*keys, **kwargs, &) = keys.each { param(_1, **kwargs, &) }
+    def params(*keys, **kwargs, &block) = keys.each { param(_1, **kwargs, &block) }
 
     ##
     # item defines an indexed parameter for an array schema.
