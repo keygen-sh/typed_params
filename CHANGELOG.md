@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Fix compatibility with Ruby 3.3.0 due to [#20091](https://bugs.ruby-lang.org/issues/20091).
+
 ## 1.1.0
 
 - Add memoization to `#typed_params` and `#typed_query` methods.
