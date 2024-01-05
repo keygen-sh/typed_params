@@ -436,6 +436,7 @@ Parameters can have validations, transforms, and more.
 - [`:optional`](#optional-parameter)
 - [`:if` and `:unless`](#conditional-parameter)
 - [`:as`](#rename-parameter)
+- [`:alias`](#alias-parameter)
 - [`:noop`](#noop-parameter)
 - [`:coerce`](#coerce-parameter)
 - [`:allow_blank`](#allow-blank)
@@ -448,6 +449,7 @@ Parameters can have validations, transforms, and more.
 - [`:length`](#length-validation)
 - [`:transform`](#transform-parameter)
 - [`:validate`](#validate-parameter)
+- [`:polymorphic`](#polymorphic-parameter)
 
 #### Parameter key
 
@@ -519,6 +521,17 @@ typed_params # => { user_id: 1 }
 
 In this example, the parameter would be accepted as `:user`, but renamed
 to `:user_id` for use inside of the controller.
+
+#### Alias parameter
+
+Allow a parameter to be provided via an alias.
+
+```ruby
+param :owner_id, type: :integer, alias: :user_id
+```
+
+In this example, the parameter would be accepted as both `:owner_id` and
+`:user_id`, but accessible as `:owner_id` inside the controller.
 
 #### Noop parameter
 
@@ -673,6 +686,33 @@ param :invalid, type: :string, validate: -> v {
   raise TypedParams::ValidationError, 'is always invalid'
 }
 ```
+
+#### Polymorphic parameter
+
+***Currently, this option is only utilized by the JSONAPI formatter. Define
+a polymorphic parameter, used when formatting JSONAPI relationships.***
+
+```ruby
+format :jsonapi
+
+param :data, type: :hash do
+  param :relationships, type: :hash do
+    param :owner, type: :hash, polymorphic: true do
+      param :data, type: :hash do
+        param :type, type: :string, inclusion: { in: %w[users user] }
+        param :id, type: :integer
+      end
+    end
+  end
+end
+
+typed_params # => { owner_type: 'User', owner_id: 1 }
+```
+
+In this example, a polymorphic `:owner` relationship is defined. When run
+through the JSONAPI formatter, instead of formatting the relationship
+into the `:owner_id` key, it also includes the `:owner_type` key
+for a polymorphic association.
 
 ### Shared options
 
