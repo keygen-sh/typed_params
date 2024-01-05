@@ -77,7 +77,8 @@ module TypedParams
         # relationship data only contains :type and :id, otherwise it
         # will use the x_attributes key.
         rels&.each do |key, rel|
-          child = schema.children.dig(:relationships, key)
+          child = schema.children.fetch(:relationships)
+                        .children.fetch(key)
 
           case rel
           # FIXME(ezekg) We need https://bugs.ruby-lang.org/issues/18961 to
@@ -86,8 +87,7 @@ module TypedParams
             res[:"#{key.to_s.singularize}_ids"] = linkage.map { _1[:id] }
           in data: []
             res[:"#{key.to_s.singularize}_ids"] = []
-          # FIXME(ezekg) Not sure how to make this cleaner, but this handles polymorphic relationships.
-          in data: { type:, id:, **nil } if key.to_s.underscore.classify != type.underscore.classify && child.polymorphic?
+          in data: { type:, id:, **nil } if child.polymorphic?
             res[:"#{key}_type"], res[:"#{key}_id"] = type.underscore.classify, id
           in data: { type:, id:, **nil }
             res[:"#{key}_id"] = id

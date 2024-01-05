@@ -273,26 +273,4 @@ RSpec.describe TypedParams::Schema do
       end
     end
   end
-
-  describe '#dig' do
-    it 'should not raise' do
-      expect { schema.children.dig(:foo, :bar, 0) }.to_not raise_error
-    end
-
-    it 'should raise' do
-      expect { schema.children.dig(:foo, :bar, :baz) }.to raise_error TypeError
-    end
-
-    it 'should find child' do
-      child = schema.children.dig(:foo, :bar, 0, :baz)
-
-      expect(child.key).to eq :baz
-    end
-
-    it 'should not find child' do
-      child = schema.children.dig(:foo, :bar, 1, :baz)
-
-      expect(child).to be nil
-    end
-  end
 end

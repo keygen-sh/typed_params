@@ -285,9 +285,6 @@ module TypedParams
       "#<#{self.class.name} key=#{key.inspect} type=#{type.inspect} children=#{children.inspect}>"
     end
 
-    # @private
-    def dig(*keys) = children.dig(*keys)
-
     private
 
     attr_reader :controller,
