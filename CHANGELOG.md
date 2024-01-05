@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+
+- Remove `alias` from child lookup criteria in JSONAPI serializer.
+
 ## 1.2.2
 
 - Fix issue where `as:` keyword was not handled in JSONAPI relationship formatter.
