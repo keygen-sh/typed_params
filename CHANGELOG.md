@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- Add `aliases:` keyword to `#param` to allow the schema to be accessible by different names.
+- Add `polymorphic:` keyword to `#param` to define a polymorphic schema.
+
 ## 1.1.1
 
 - Fix compatibility with Ruby 3.3.0 due to [#20091](https://bugs.ruby-lang.org/issues/20091).
