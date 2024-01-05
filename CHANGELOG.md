@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2
+
+- Fix issue where `as:` keyword was not handled in JSONAPI relationship formatter.
+
 ## 1.2.1
 
 - Update JSONAPI formatter to simplify logic for polymorphic relationships.
