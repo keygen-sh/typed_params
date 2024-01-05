@@ -138,4 +138,30 @@ RSpec.describe TypedParams::Processor do
     expect(params[:bar]).to be nil
     expect(params[:baz]).to be nil
   end
+
+  it 'should alias param with type mismatch' do
+    schema    = TypedParams::Schema.new(type: :hash) { param :foo, type: :integer, alias: :bar }
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { bar: 'baz' })
+    processor = TypedParams::Processor.new(schema:)
+
+    expect { processor.call(params) }.to raise_error TypedParams::InvalidParameterError
+  end
+
+  it 'should alias param with validation' do
+    schema    = TypedParams::Schema.new(type: :hash) { param :foo, type: :integer, alias: :bar, validate: -> v { false } }
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { bar: 1 })
+    processor = TypedParams::Processor.new(schema:)
+
+    expect { processor.call(params) }.to raise_error TypedParams::InvalidParameterError
+  end
+
+  it 'should alias param with transform' do
+    schema    = TypedParams::Schema.new(type: :hash) { param :foo, type: :integer, alias: :bar, transform: -> k, v { [k, v + 1] } }
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { bar: 1 })
+    processor = TypedParams::Processor.new(schema:)
+
+    processor.call(params)
+
+    expect(params[:foo]).to satisfy { _1 in TypedParams::Parameter(value: 2) }
+  end
 end
