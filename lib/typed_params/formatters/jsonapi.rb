@@ -80,7 +80,7 @@ module TypedParams
         relationships&.each do |key, relationship|
           child = schema.children.fetch(:relationships).then do |rels|
                     rels.children.fetch(key) {
-                      rels.children.values.find { _1.as == key || _1.alias == key }
+                      rels.children.values.find { _1.as == key }
                     }
                   end
 
