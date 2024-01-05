@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- Update JSONAPI formatter to simplify logic for polymorphic relationships.
+
 ## 1.2.0
 
 - Add `aliases:` keyword to `#param` to allow the schema to be accessible by different names.
