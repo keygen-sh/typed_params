@@ -32,12 +32,16 @@ module TypedParams
     #   }
     #
     module JSONAPI
-      def self.call(params)
+      def self.call(params, schema:)
         case params
         in data: Array => data
-          format_array_data(data)
+          child = schema.children.fetch(:data)
+
+          format_array_data(data, schema: child)
         in data: Hash => data
-          format_hash_data(data)
+          child = schema.children.fetch(:data)
+
+          format_hash_data(data, schema: child)
         else
           params
         end
@@ -45,11 +49,15 @@ module TypedParams
 
       private
 
-      def self.format_array_data(data)
-        data.map { format_hash_data(_1) }
+      def self.format_array_data(data, schema:)
+        data.each_with_index.map do |value, i|
+          child = schema.children.fetch(i) { schema.endless? ? schema.children.first : nil }
+
+          format_hash_data(value, schema: child)
+        end
       end
 
-      def self.format_hash_data(data)
+      def self.format_hash_data(data, schema:)
         rels  = data[:relationships]
         attrs = data[:attributes]
         res   = data.except(
@@ -69,6 +77,8 @@ module TypedParams
         # relationship data only contains :type and :id, otherwise it
         # will use the x_attributes key.
         rels&.each do |key, rel|
+          child = schema.children.dig(:relationships, key)
+
           case rel
           # FIXME(ezekg) We need https://bugs.ruby-lang.org/issues/18961 to
           #              clean this up (i.e. remove the if guard).
@@ -77,7 +87,7 @@ module TypedParams
           in data: []
             res[:"#{key.to_s.singularize}_ids"] = []
           # FIXME(ezekg) Not sure how to make this cleaner, but this handles polymorphic relationships.
-          in data: { type:, id:, **nil } if key.to_s.underscore.classify != type.underscore.classify
+          in data: { type:, id:, **nil } if key.to_s.underscore.classify != type.underscore.classify && child.polymorphic?
             res[:"#{key}_type"], res[:"#{key}_id"] = type.underscore.classify, id
           in data: { type:, id:, **nil }
             res[:"#{key}_id"] = id
@@ -86,7 +96,7 @@ module TypedParams
           else
             # NOTE(ezekg) Embedded relationships are non-standard as per the
             #             JSONAPI spec, but I don't really care. :)
-            res[:"#{key}_attributes"] = call(rel)
+            res[:"#{key}_attributes"] = call(rel, schema: child)
           end
         end
 

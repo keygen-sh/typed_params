@@ -22,6 +22,7 @@ module TypedParams
       key: nil,
       optional: false,
       coerce: false,
+      polymorphic: false,
       allow_blank: false,
       allow_nil: false,
       allow_non_scalars: false,
@@ -79,6 +80,7 @@ module TypedParams
       @key               = key
       @optional          = optional
       @coerce            = coerce && @type.coercable?
+      @polymorphic       = polymorphic
       @allow_blank       = key == ROOT || allow_blank
       @allow_nil         = allow_nil
       @allow_non_scalars = allow_non_scalars
@@ -261,6 +263,7 @@ module TypedParams
     def optional?          = !!@optional
     def required?          = !optional?
     def coerce?            = !!@coerce
+    def polymorphic?       = !!@polymorphic
     def allow_blank?       = !!@allow_blank
     def allow_nil?         = !!@allow_nil
     def allow_non_scalars? = !!@allow_non_scalars
@@ -277,6 +280,9 @@ module TypedParams
     def inspect
       "#<#{self.class.name} key=#{key.inspect} type=#{type.inspect} children=#{children.inspect}>"
     end
+
+    # @private
+    def dig(*keys) = children.dig(*keys)
 
     private
 

@@ -14,7 +14,7 @@ module TypedParams
 
       def decorator? = decorator.present?
 
-      delegate :arity, :call, to: :@transform
+      delegate :arity, :parameters, :call, to: :@transform
     end
   end
 end

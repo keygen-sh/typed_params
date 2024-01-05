@@ -75,7 +75,16 @@ module TypedParams
       if formatter.present?
         v = case formatter.arity
             when 2
-              formatter.call(v, controller:)
+              case formatter.parameters
+              in [[:req, *], [:keyreq | :key, :controller], [:keyreq | :key, :schema]]
+                formatter.call(v, controller:, schema:)
+              in [[:req, *], [:keyreq | :key, :schema], [:keyreq | :key, :controller]]
+                formatter.call(v, schema:, controller:)
+              in [[:req, *], [:keyreq | :key, :controller]]
+                formatter.call(v, controller:)
+              in [[:req, *], [:keyreq | :key, :schema]]
+                formatter.call(v, schema:)
+              end
             when 1
               formatter.call(v)
             end

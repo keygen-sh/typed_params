@@ -361,7 +361,6 @@ RSpec.describe 'controller', type: :controller do
 
       body = JSON.parse(response.body, symbolize_names: true)
 
-      # FIXME(ezekg) Use rails-controller-testing gem for assigns[]?
       expect(body[:params]).to eq data.slice(:id)
       expect(body[:meta]).to eq meta
       expect(body[:data]).to eq data
@@ -401,7 +400,6 @@ RSpec.describe 'controller', type: :controller do
 
       body = JSON.parse(response.body, symbolize_names: true)
 
-      # FIXME(ezekg) Use rails-controller-testing gem for assigns[]?
       expect(body).to eq user
     end
   end
@@ -442,7 +440,6 @@ RSpec.describe 'controller', type: :controller do
 
       body = JSON.parse(response.body, symbolize_names: true)
 
-      # FIXME(ezekg) Use rails-controller-testing gem for assigns[]?
       expect(body).to eq user
     end
   end

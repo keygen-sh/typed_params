@@ -18,7 +18,7 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
           param :password, type: :string
         end
         param :relationships, type: :hash do
-          param :inviter, type: :hash do
+          param :inviter, type: :hash, polymorphic: true do
             param :data, type: :hash do
               param :type, type: :string, inclusion: { in: %w[users user] }
               param :id, type: :string
@@ -49,6 +49,12 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
                   param :content, type: :string, length: { minimum: 80 }, optional: true
                 end
               end
+            end
+          end
+          param :partner, type: :hash do
+            param :data, type: :hash do
+              param :type, type: :string, inclusion: { in: %w[users user] }
+              param :id, type: :string
             end
           end
           param :friends, type: :hash do
@@ -90,6 +96,9 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
             { type: 'posts', id: SecureRandom.base58 },
           ],
         },
+        partner: {
+          data: { type: 'users', id: SecureRandom.base58 },
+        },
         friends: {
           data: [
             { type: 'users', id: SecureRandom.base58 },
@@ -128,6 +137,7 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
         { id: data[:relationships][:posts][:data][2][:id] },
         { id: data[:relationships][:posts][:data][3][:id] },
       ],
+      partner_id: data[:relationships][:partner][:data][:id],
       friend_ids: [
         data[:relationships][:friends][:data][0][:id],
         data[:relationships][:friends][:data][1][:id],
