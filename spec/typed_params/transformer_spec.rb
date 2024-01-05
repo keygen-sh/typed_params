@@ -180,7 +180,7 @@ RSpec.describe TypedParams::Transformer do
     expect(params[:foo]).to be nil
   end
 
-  it 'should rename aliased param' do
+  it 'should rename param' do
     schema      = TypedParams::Schema.new(type: :hash) { param :foo, type: :string, as: :bar }
     params      = TypedParams::Parameterizer.new(schema:).call(value: { foo: 'baz' })
     transformer = TypedParams::Transformer.new(schema:)
@@ -191,7 +191,7 @@ RSpec.describe TypedParams::Transformer do
     expect(params[:bar].value).to be 'baz'
   end
 
-  it 'should rename multiple aliased params' do
+  it 'should rename multiple params' do
     schema = TypedParams::Schema.new type: :hash do
       param :foo, type: :integer, as: :qux
       param :bar, type: :integer, as: :qux

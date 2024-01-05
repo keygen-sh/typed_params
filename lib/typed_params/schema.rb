@@ -10,6 +10,7 @@ module TypedParams
                 :source,
                 :type,
                 :key,
+                :as,
                 :alias,
                 :if,
                 :unless
@@ -80,6 +81,7 @@ module TypedParams
       @strict            = strict
       @parent            = parent
       @key               = key
+      @as                = as
       @alias             = binding.local_variable_get(:alias)
       @optional          = optional
       @coerce            = coerce && @type.coercable?

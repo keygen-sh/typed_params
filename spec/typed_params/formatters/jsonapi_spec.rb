@@ -18,7 +18,7 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
           param :password, type: :string
         end
         param :relationships, type: :hash do
-          param :inviter, type: :hash, polymorphic: true do
+          param :inviter, type: :hash, as: :source, polymorphic: true, optional: true do
             param :data, type: :hash do
               param :type, type: :string, inclusion: { in: %w[users user] }
               param :id, type: :string
@@ -29,7 +29,7 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
               param :type, type: :string, inclusion: { in: %w[notes note] }
               param :id, type: :string
               param :attributes, type: :hash, optional: true do
-                param :content, type: :string, length: { minimum: 80 }
+                param :content, type: :string, length: { minimum: 1 }
               end
             end
           end
@@ -118,14 +118,17 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
   end
 
   it 'should format params' do
-    params = TypedParams::Parameterizer.new(schema:).call(value: { meta:, data: })
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { meta:, data: })
+    processor = TypedParams::Processor.new(schema:)
+
+    processor.call(params)
 
     expect(params.unwrap).to eq(
       id: data[:id],
       email: data[:attributes][:email],
       password: data[:attributes][:password],
-      inviter_type: data[:relationships][:inviter][:data][:type].classify,
-      inviter_id: data[:relationships][:inviter][:data][:id],
+      source_type: data[:relationships][:inviter][:data][:type].classify,
+      source_id: data[:relationships][:inviter][:data][:id],
       note_attributes: {
         id: data[:relationships][:note][:data][:id],
         content: data[:relationships][:note][:data][:attributes][:content],

@@ -58,9 +58,10 @@ module TypedParams
       end
 
       def self.format_hash_data(data, schema:)
-        rels  = data[:relationships]
-        attrs = data[:attributes]
-        res   = data.except(
+        relationships  = data[:relationships]
+        attributes     = data[:attributes]
+
+        res = data.except(
           :attributes,
           :links,
           :meta,
@@ -69,18 +70,21 @@ module TypedParams
         )
 
         # Move attributes over to top-level params
-        attrs&.each do |key, attr|
-          res[key] = attr
+        attributes&.each do |key, attribute|
+          res[key] = attribute
         end
 
         # Move relationships over. This will use x_id and x_ids when the
         # relationship data only contains :type and :id, otherwise it
         # will use the x_attributes key.
-        rels&.each do |key, rel|
-          child = schema.children.fetch(:relationships)
-                        .children.fetch(key)
+        relationships&.each do |key, relationship|
+          child = schema.children.fetch(:relationships).then do |rels|
+                    rels.children.fetch(key) {
+                      rels.children.values.find { _1.as == key || _1.alias == key }
+                    }
+                  end
 
-          case rel
+          case relationship
           # FIXME(ezekg) We need https://bugs.ruby-lang.org/issues/18961 to
           #              clean this up (i.e. remove the if guard).
           in data: [{ type:, id:, **nil }, *] => linkage if linkage.all? { _1 in type:, id:, **nil }
@@ -96,7 +100,7 @@ module TypedParams
           else
             # NOTE(ezekg) Embedded relationships are non-standard as per the
             #             JSONAPI spec, but I don't really care. :)
-            res[:"#{key}_attributes"] = call(rel, schema: child)
+            res[:"#{key}_attributes"] = call(relationship, schema: child)
           end
         end
 
