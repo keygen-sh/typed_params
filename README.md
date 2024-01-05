@@ -689,8 +689,10 @@ param :invalid, type: :string, validate: -> v {
 
 #### Polymorphic parameter
 
-***Currently, this option is only utilized by the JSONAPI formatter. Define
-a polymorphic parameter, used when formatting JSONAPI relationships.***
+_Note: currently, this option is only utilized by the JSONAPI formatter._
+
+Define a polymorphic parameter. Actual behavior will vary based on the
+formatter being used.
 
 ```ruby
 format :jsonapi
@@ -711,8 +713,8 @@ typed_params # => { owner_type: 'User', owner_id: 1 }
 
 In this example, a polymorphic `:owner` relationship is defined. When run
 through the JSONAPI formatter, instead of formatting the relationship
-into the `:owner_id` key, it also includes the `:owner_type` key
-for a polymorphic association.
+into solely the `:owner_id` key, it also includes the `:owner_type`
+key for a polymorphic association.
 
 ### Shared options
 
