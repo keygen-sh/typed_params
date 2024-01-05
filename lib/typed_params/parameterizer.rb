@@ -38,7 +38,7 @@ module TypedParams
 
       value.each_with_index do |v, i|
         unless schema.children.nil?
-          child = schema.children.fetch(i) { schema.boundless? ? schema.children.first : nil }
+          child = schema.children.fetch(i) { schema.endless? ? schema.children.first : nil }
           if child.nil?
             raise UnpermittedParameterError.new('unpermitted parameter', path: Path.new(*param.path.keys, i), source: schema.source) if
               schema.strict?
@@ -63,7 +63,7 @@ module TypedParams
 
       value.each do |k, v|
         unless schema.children.nil?
-          child = schema.children.fetch(k) { nil }
+          child = schema.children.fetch(k) { schema.children.values.find { _1.alias == k } }
           if child.nil?
             raise UnpermittedParameterError.new('unpermitted parameter', path: Path.new(*param.path.keys, k), source: schema.source) if
               schema.strict?
@@ -71,7 +71,7 @@ module TypedParams
             next
           end
 
-          param[k] = Parameterizer.new(schema: child, parent: param).call(key: k, value: v)
+          param[child.key] = Parameterizer.new(schema: child, parent: param).call(key: child.key, value: v)
         else
           param[k] = Parameter.new(key: k, value: v, schema:, parent: param)
         end

@@ -10,6 +10,7 @@ module TypedParams
                 :source,
                 :type,
                 :key,
+                :alias,
                 :if,
                 :unless
 
@@ -37,6 +38,7 @@ module TypedParams
       if: nil,
       unless: nil,
       as: nil,
+      alias: nil,
       casing: TypedParams.config.key_transform,
       &block
     )
@@ -78,6 +80,7 @@ module TypedParams
       @strict            = strict
       @parent            = parent
       @key               = key
+      @alias             = binding.local_variable_get(:alias)
       @optional          = optional
       @coerce            = coerce && @type.coercable?
       @polymorphic       = polymorphic
@@ -222,7 +225,7 @@ module TypedParams
         Types.array?(children)
 
       raise ArgumentError, "index #{key} has already been defined" if
-        children[key].present? || boundless?
+        children[key].present? || endless?
 
       children << Schema.new(**options, **kwargs, key:, type:, strict:, source:, casing:, parent: self, &block)
     end
@@ -232,7 +235,7 @@ module TypedParams
     def items(**kwargs, &)
       item(0, **kwargs, &)
 
-      boundless!
+      endless!
     end
 
     def path
@@ -264,12 +267,13 @@ module TypedParams
     def required?          = !optional?
     def coerce?            = !!@coerce
     def polymorphic?       = !!@polymorphic
+    def aliased?           = !!@alias
     def allow_blank?       = !!@allow_blank
     def allow_nil?         = !!@allow_nil
     def allow_non_scalars? = !!@allow_non_scalars
     def nilify_blanks?     = !!@nilify_blanks
-    def boundless?         = !!@boundless
-    def indexed?           = !boundless?
+    def endless?         = !!@endless
+    def indexed?           = !endless?
     def if?                = !@if.nil?
     def unless?            = !@unless.nil?
     def array?             = Types.array?(type)
@@ -291,6 +295,6 @@ module TypedParams
                 :strict,
                 :casing
 
-    def boundless! = @boundless = true
+    def endless! = @endless = true
   end
 end

@@ -465,8 +465,53 @@ RSpec.describe 'controller', type: :controller do
 
       body = JSON.parse(response.body, symbolize_names: true)
 
-      # FIXME(ezekg) Use rails-controller-testing gem for assigns[]?
       expect(body).to eq parent_key: { child_key: 'value' }
+    end
+  end
+
+  context 'with key rename' do
+    controller do
+      include TypedParams::Controller
+
+      typed_params do
+        param :foo, type: :string, as: :bar
+      end
+      def create = render json: typed_params
+    end
+
+    it 'should rename param' do
+      post :create, params: { foo: 'test' }
+
+      body = JSON.parse(response.body, symbolize_names: true)
+
+      expect(body).to eq bar: 'test'
+    end
+  end
+
+  context 'with key alias' do
+    controller do
+      include TypedParams::Controller
+
+      typed_params do
+        param :foo, type: :string, alias: :bar
+      end
+      def create = render json: typed_params
+    end
+
+    it 'should allow aliased param' do
+      post :create, params: { bar: 'test' }
+
+      body = JSON.parse(response.body, symbolize_names: true)
+
+      expect(body).to eq foo: 'test'
+    end
+
+    it 'should allow real param' do
+      post :create, params: { foo: 'test' }
+
+      body = JSON.parse(response.body, symbolize_names: true)
+
+      expect(body).to eq foo: 'test'
     end
   end
 

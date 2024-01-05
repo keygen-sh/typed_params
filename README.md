@@ -748,7 +748,7 @@ which may be a nested schema.
 
 ```ruby
 # array of hashes
-param :boundless_array, type: :array do
+param :endless_array, type: :array do
   items type: :hash do
     # ...
   end

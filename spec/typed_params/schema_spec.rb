@@ -54,12 +54,12 @@ RSpec.describe TypedParams::Schema do
       expect { TypedParams::Schema.new(type: :array) { item type: :string } }.to_not raise_error
     end
 
-    it 'should raise on boundless index conflict' do
+    it 'should raise on endless index conflict' do
       expect { TypedParams::Schema.new(type: :array) { items type: :string; item type: :string } }
         .to raise_error ArgumentError
     end
 
-    it 'should raise on bounded index conflict' do
+    it 'should raise on sparse index conflict' do
       expect { TypedParams::Schema.new(type: :array) { item type: :string; items type: :string } }
         .to raise_error ArgumentError
     end
@@ -186,9 +186,9 @@ RSpec.describe TypedParams::Schema do
   describe '#path' do
     it 'should have correct path' do
       grandchild = schema.children[:foo]
-                        .children[:bar]
-                        .children[0]
-                        .children[:baz]
+                         .children[:bar]
+                         .children[0]
+                         .children[:baz]
 
       expect(grandchild.path.to_json_pointer).to eq '/foo/bar/0/baz'
     end
@@ -197,7 +197,7 @@ RSpec.describe TypedParams::Schema do
   describe '#keys' do
     it 'should have correct array keys' do
       grandchild = schema.children[:foo]
-                        .children[:bar]
+                         .children[:bar]
 
       expect(grandchild.keys).to eq [0]
     end

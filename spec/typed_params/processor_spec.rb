@@ -126,4 +126,16 @@ RSpec.describe TypedParams::Processor do
     expect(params[:foo]).to_not be nil
     expect(params[:bar]).to be nil
   end
+
+  it 'should alias param' do
+    schema    = TypedParams::Schema.new(type: :hash) { param :foo, type: :integer, alias: :bar }
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { bar: 1 })
+    processor = TypedParams::Processor.new(schema:)
+
+    processor.call(params)
+
+    expect(params[:foo]).to_not be nil
+    expect(params[:bar]).to be nil
+    expect(params[:baz]).to be nil
+  end
 end
