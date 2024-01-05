@@ -272,7 +272,7 @@ module TypedParams
     def allow_nil?         = !!@allow_nil
     def allow_non_scalars? = !!@allow_non_scalars
     def nilify_blanks?     = !!@nilify_blanks
-    def endless?         = !!@endless
+    def endless?           = !!@endless
     def indexed?           = !endless?
     def if?                = !@if.nil?
     def unless?            = !@unless.nil?
