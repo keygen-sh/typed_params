@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.4
+
+- Fix issue where both `minimum` and `maximum` constraints could not be added to a `length:` validator.
+
 ## 1.2.3
 
 - Remove `alias` from child lookup criteria in JSONAPI serializer.
