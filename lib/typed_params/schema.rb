@@ -66,13 +66,14 @@ module TypedParams
           format.key?(:without)
         )
 
-      raise ArgumentError, 'length must be a hash with :minimum, :maximum, :within, :in, or :is keys (but not multiple)' unless
+      raise ArgumentError, 'length must be a hash with :minimum, :maximum, :within, :in, or :is keys (but not multiple except for :minimum and :maximum)' unless
         length.nil? || length.is_a?(Hash) && (
-          length.key?(:minimum) ^
-          length.key?(:maximum) ^
-          length.key?(:within) ^
-          length.key?(:in) ^
-          length.key?(:is)
+          length.key?(:minimum) && length.key?(:maximum) && length.size == 2 ||
+            length.key?(:minimum) ^
+            length.key?(:maximum) ^
+            length.key?(:within) ^
+            length.key?(:in) ^
+            length.key?(:is)
         )
 
       @controller        = controller

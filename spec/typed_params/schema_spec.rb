@@ -151,6 +151,11 @@ RSpec.describe TypedParams::Schema do
     end
   end
 
+  it 'should not raise on multiple :length options' do
+    expect { TypedParams::Schema.new(type: :string, length: { minimum: 1, maximum: 42 }) }
+      .to_not raise_error
+  end
+
   it 'should raise on multiple :length options' do
     expect { TypedParams::Schema.new(type: :string, length: { in: 1..3, maximum: 42 }) }
       .to raise_error ArgumentError
