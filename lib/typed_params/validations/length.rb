@@ -7,6 +7,9 @@ module TypedParams
     class Length < Validation
       def call(value)
         case options
+        in minimum: Numeric => min, maximum: Numeric => max
+          raise ValidationError, "length must be between #{min} and #{max} (inclusive)" unless
+            value.length >= min && value.length <= max
         in minimum: Numeric => n
           raise ValidationError, "length must be greater than or equal to #{n}" unless
             value.length >= n

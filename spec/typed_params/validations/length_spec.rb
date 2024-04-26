@@ -30,6 +30,19 @@ RSpec.describe TypedParams::Validations::Length do
     end
   end
 
+  context 'with minumim: and maximum: options' do
+    let(:options) {{ minimum: 3, maximum: 5 }}
+
+    it 'should succeed' do
+      expect { validation.call('foo') }.to_not raise_error
+    end
+
+    it 'should fail' do
+      expect { validation.call('foobar') }.to raise_error TypedParams::ValidationError
+      expect { validation.call('fo') }.to raise_error TypedParams::ValidationError
+    end
+  end
+
   context 'with within: option' do
     context 'with range' do
       let(:options) {{ within: 1..3 }}
