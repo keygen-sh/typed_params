@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5
+
+- Fix issue where a `minimum` and `maximum` constraint combo was not asserted by the `length:` validator.
+
 ## 1.2.4
 
 - Fix issue where both `minimum` and `maximum` constraints could not be added to a `length:` validator.
