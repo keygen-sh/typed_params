@@ -6,7 +6,7 @@ module TypedParams
   class Validator < Mapper
     def call(params)
       raise InvalidParameterError.new('is missing', path: schema.path, source: schema.source) if
-        params.nil? && schema.required? && !schema.allow_nil?
+        params.nil? && schema.required?
 
       depth_first_map(params) do |param|
         schema = param.schema

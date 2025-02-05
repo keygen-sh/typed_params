@@ -53,6 +53,21 @@ RSpec.describe TypedParams::Validator do
     expect { validator.call(params) }.to_not raise_error
   end
 
+  it 'should raise on missing nested required params' do
+    schema = TypedParams::Schema.new(type: :hash) do
+      param :foo, type: :hash do
+        param :bar, type: :hash do
+          param :baz, type: :string
+        end
+      end
+    end
+
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: {} })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error TypedParams::InvalidParameterError
+  end
+
   it 'should not raise on missing nested optional params' do
     schema = TypedParams::Schema.new(type: :hash) do
       param :foo, type: :hash do
@@ -66,6 +81,21 @@ RSpec.describe TypedParams::Validator do
     validator = TypedParams::Validator.new(schema:)
 
     expect { validator.call(params) }.to_not raise_error
+  end
+
+  it 'should raise on missing nested nilable params' do
+    schema = TypedParams::Schema.new(type: :hash) do
+      param :foo, type: :hash do
+        param :bar, type: :hash, allow_nil: true do
+          param :baz, type: :string
+        end
+      end
+    end
+
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: {} })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error TypedParams::InvalidParameterError
   end
 
   it 'should raise on missing required param' do
@@ -377,6 +407,14 @@ RSpec.describe TypedParams::Validator do
     expect { validator.call(params) }.to_not raise_error
   end
 
+  it 'should not raise on empty array' do
+    schema    = TypedParams::Schema.new(type: :array)
+    params    = TypedParams::Parameterizer.new(schema:).call(value: [])
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to_not raise_error
+  end
+
   it 'should raise on array of non-scalar values' do
     schema    = TypedParams::Schema.new(type: :array)
     params    = TypedParams::Parameterizer.new(schema:).call(value: [1, 2, [3]])
@@ -388,6 +426,32 @@ RSpec.describe TypedParams::Validator do
   it 'should not raise on array of non-scalar values' do
     schema    = TypedParams::Schema.new(type: :array, allow_non_scalars: true)
     params    = TypedParams::Parameterizer.new(schema:).call(value: [1, 2, [3]])
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to_not raise_error
+  end
+
+  it 'should not raise on array of objects' do
+    schema = TypedParams::Schema.new type: :array do
+      items type: :hash do
+        param :key, type: :string
+      end
+    end
+
+    params    = TypedParams::Parameterizer.new(schema:).call(value: [key: 'value'])
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to_not raise_error
+  end
+
+  it 'should not raise on empty array of objects' do
+    schema = TypedParams::Schema.new type: :array do
+      items type: :hash do
+        param :key, type: :string
+      end
+    end
+
+    params    = TypedParams::Parameterizer.new(schema:).call(value: [])
     validator = TypedParams::Validator.new(schema:)
 
     expect { validator.call(params) }.to_not raise_error
