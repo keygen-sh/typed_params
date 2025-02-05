@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.6
+
+- Fix issue where an empty param of type `hash` or `array` would not raise when a required but `allow_nil` child param was missing.
+
 ## 1.2.5
 
 - Fix issue where a `minimum` and `maximum` constraint combo was not asserted by the `length:` validator.
