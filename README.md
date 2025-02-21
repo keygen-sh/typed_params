@@ -155,7 +155,7 @@ class UsersController < ApplicationController
     end
   }
   def create
-    user = User.new(user_params)
+    user = User.new(types_params[:user])
 
     if user.save
       render_created user, location: v1_user_url(user)
