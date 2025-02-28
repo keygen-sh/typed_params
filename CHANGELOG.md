@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.7
+
+- Fix issue where the JSONAPI formatter did not ignore `meta` when `data` is omitted.
+
 ## 1.2.6
 
 - Fix issue where an empty param of type `hash` or `array` would not raise when a required but `allow_nil` child param was missing.
@@ -14,7 +18,7 @@
 
 ## 1.2.3
 
-- Remove `alias` from child lookup criteria in JSONAPI serializer.
+- Remove `alias` from child lookup criteria in JSONAPI formatter.
 
 ## 1.2.2
 
