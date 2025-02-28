@@ -68,6 +68,7 @@ Links:
   - [Non-scalar types](#non-scalar-types)
   - [Custom types](#custom-types)
   - [Formats](#formats)
+  - [Custom formats](#custom-formats)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -941,6 +942,39 @@ class UsersController < ApplicationController
     #      }
     #    }
   end
+end
+```
+
+### Custom formats
+
+You may register custom formatters that can be utilized in your schemas.
+
+```rb
+TypedParams::Formatters.register(:strong_params,
+  transform: -> (params, controller:) {
+    wrapper   = controller.controller_name.singularize.to_sym
+    unwrapped = params[wrapper]
+
+    ActionController::Parameters.new(unwrapped).permit!
+  },
+)
+```
+
+```rb
+typed_params {
+  format :strong_params
+
+  param :user, type: :hash do
+    param :email, type: :string, format: { with: /@/ }
+    param :password, type: :string
+  end
+}
+def create
+  puts user_params
+  # => #<ActionController::Parameters
+  #       {"email"=>"json@smith.example","password"=>"7c84241a1102"}
+  #       permitted: true
+  #     >
 end
 ```
 
