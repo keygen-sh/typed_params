@@ -949,9 +949,9 @@ end
 
 You may register custom formatters that can be utilized in your schemas.
 
-Each format consists of, at minimum, a `transform:` lambda, accepting a params
-hash as well as optional `controller:` and `schema:` keywords, and returning
-the formatted params.
+Each formatter consists of, at minimum, a `transform:` lambda, accepting a
+params hash as well as optional `controller:` and `schema:` keywords, and
+returning the formatted params.
 
 For more usage examples, see [the default formatters](https://github.com/keygen-sh/typed_params/tree/master/lib/typed_params/formatters).
 
