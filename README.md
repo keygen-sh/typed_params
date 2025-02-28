@@ -949,6 +949,9 @@ end
 
 You may register custom formatters that can be utilized in your schemas.
 
+The `transform` proc accepts a params hash, as well as optional `controller`
+and `schema` keywords. The proc should return the formatted params.
+
 ```rb
 TypedParams::Formatters.register(:strong_params,
   transform: -> (params, controller:) {
