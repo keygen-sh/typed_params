@@ -183,4 +183,33 @@ RSpec.describe TypedParams::Formatters::JSONAPI do
       expect(params.unwrap).to be_empty
     end
   end
+
+  context 'when formatting meta' do
+    let :schema do
+      TypedParams::Schema.new(type: :hash) do
+        format :jsonapi
+
+        param :data, type: :hash, optional: true do
+          param :type, type: :string, inclusion: { in: %w[users user] }
+          param :id, type: :string, optional: true
+        end
+        param :meta, type: :hash do
+          param :key, type: :string
+        end
+      end
+    end
+
+    it 'should format data and ignore meta' do
+      data   = { type: 'user', id: SecureRandom.base58 }
+      params = TypedParams::Parameterizer.new(schema:).call(value: { data:, meta: })
+
+      expect(params.unwrap).to eq(data.slice(:id))
+    end
+
+    it 'should ignore meta' do
+      params = TypedParams::Parameterizer.new(schema:).call(value: { meta: })
+
+      expect(params.unwrap).to be_empty
+    end
+  end
 end

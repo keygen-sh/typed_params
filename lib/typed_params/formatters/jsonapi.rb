@@ -43,7 +43,7 @@ module TypedParams
 
           format_hash_data(data, schema: child)
         else
-          params
+          {}
         end
       end
 
