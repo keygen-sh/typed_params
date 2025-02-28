@@ -949,8 +949,9 @@ end
 
 You may register custom formatters that can be utilized in your schemas.
 
-The `transform` proc accepts a params hash, as well as optional `controller`
-and `schema` keywords. The proc should return the formatted params.
+Each format consists of, at minimum, a `transform:` lambda, accepting a params
+hash, as well as optional `controller:` and `schema:` keywords, and returning
+the formatted params. For more usage examples, see [the default formatters](https://github.com/keygen-sh/typed_params/tree/master/lib/typed_params/formatters).
 
 ```rb
 TypedParams::Formatters.register(:strong_params,
