@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+
+- Add `:any` type to skip type validation for a given param.
+
 ## 1.2.7
 
 - Fix issue where the JSONAPI formatter did not ignore `meta` when `data` is omitted.
