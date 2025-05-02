@@ -41,6 +41,7 @@ module TypedParams
       def accepts_block? = !!@accepts_block
       def coercable?     = !!@coerce
       def scalar?        = !!@scalar
+      def any?           = @type == :any
       def abstract?      = !!@abstract
       def subtype?       = !!@archetype
 

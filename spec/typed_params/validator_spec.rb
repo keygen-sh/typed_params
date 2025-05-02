@@ -29,6 +29,30 @@ RSpec.describe TypedParams::Validator do
     expect { validator.call(params) }.to raise_error TypedParams::InvalidParameterError
   end
 
+  it 'should not raise for any type' do
+    schema = TypedParams::Schema.new(type: :hash) do
+      param :foo, type: :hash do
+        param :bar, type: :any
+      end
+    end
+
+    values = [1, '2', :'3', { four: 4 }, [5, '6', :'7', { eight: 8 }, [9]], true, false]
+
+    values.each do |value|
+      params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: { bar: value } })
+      validator = TypedParams::Validator.new(schema:)
+
+      expect { validator.call(params) }.to_not raise_error TypedParams::InvalidParameterError
+    end
+  end
+
+  it 'should raise for nil any type' do
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: { bar: nil } })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error TypedParams::InvalidParameterError
+  end
+
   it 'should not raise on missing optional root' do
     schema    = TypedParams::Schema.new(type: :hash, optional: true)
     params    = TypedParams::Parameterizer.new(schema:).call(value: nil)

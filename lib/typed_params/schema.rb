@@ -281,7 +281,8 @@ module TypedParams
     def unless?            = !@unless.nil?
     def array?             = Types.array?(type)
     def hash?              = Types.hash?(type)
-    def scalar?            = Types.scalar?(type)
+    def scalar?            = type.scalar?
+    def any?               = type.any?
     def formatter?         = !!@formatter
 
     def inspect
