@@ -781,6 +781,7 @@ Type `:date`. Defines a date parameter. Must be a `Date`.
 
 - [`:array`](#array-type)
 - [`:hash`](#hash-type)
+- [`:any`](#any-type)
 
 #### Array type
 
@@ -820,6 +821,14 @@ end
 # non-schema hash
 param :only_scalars, type: :hash
 param :non_scalars_too, type: :hash, allow_non_scalars: true
+```
+
+#### Any type
+
+Type `:any`. Defines a parameter that is not type checked.
+
+```ruby
+param :anything_goes, type: :any
 ```
 
 ### Custom types

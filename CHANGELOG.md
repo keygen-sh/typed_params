@@ -2,7 +2,7 @@
 
 ## 1.3.0
 
-- Add `:any` type to skip type validation for a given param.
+- Add `any` type to skip type validation for a given param.
 
 ## 1.2.7
 
