@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0
+
+- Add `depth:` validator for asserting maximum depth of `hash` and `array` params.
+
 ## 1.3.0
 
 - Add `any` type to skip type validation for a given param.
