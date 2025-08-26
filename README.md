@@ -448,6 +448,7 @@ Parameters can have validations, transforms, and more.
 - [`:exclusion`](#exclusion-validation)
 - [`:format`](#format-validation)
 - [`:length`](#length-validation)
+- [`:depth`](#depth-validation)
 - [`:transform`](#transform-parameter)
 - [`:validate`](#validate-parameter)
 - [`:polymorphic`](#polymorphic-parameter)
@@ -580,15 +581,21 @@ error.
 
 #### Allow non-scalars
 
-Only applicable to the `:hash` type and its subtypes. Allow non-scalar values in
-a `:hash` parameter. Scalar types can be found under [Types](#scalar-types).
+Only applicable to the `:hash` and `:array` types, and their subtypes. Allow
+non-scalar values in a `:hash` or `:array` parameter.
 
 ```ruby
+# Allow unlimited nesting
 param :metadata, type: :hash, allow_non_scalars: true
+
+# Disallow non-scalars
+param :data, type: :hash, allow_non_scalars: false
 ```
 
 By default, non-scalar parameters are rejected with a `TypedParams::InvalidParameterError`
-error.
+error. Use [`:depth`](#depth-validation) to control maximum depth.
+
+Scalar types can be found under [Types](#scalar-types).
 
 #### Nilify blanks
 
@@ -638,6 +645,20 @@ param :tweet, type: :string, length: { within: ..160 }
 param :odd, type: :string, length: { in: [2, 4, 6, 8] }
 param :ten, type: :string, length: { is: 10 }
 ```
+
+#### Depth validation
+
+The parameter must be a certain depth.
+
+```ruby
+# Allow nested objects up to 2 levels deep
+param :config, type: :hash, depth: { maximum: 2 }
+
+# Allow nested arrays up to 3 levels deep
+param :data, type: :array, depth: { maximum: 3 }
+```
+
+Only applicable for `:hash` and `:array` types. Automatically sets `allow_non_scalars: true`.
 
 #### Transform parameter
 
@@ -821,6 +842,7 @@ end
 # non-schema hash
 param :only_scalars, type: :hash
 param :non_scalars_too, type: :hash, allow_non_scalars: true
+param :limited_nesting, type: :hash, depth: { maximum: 2 }
 ```
 
 #### Any type

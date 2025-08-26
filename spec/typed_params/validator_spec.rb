@@ -407,8 +407,16 @@ RSpec.describe TypedParams::Validator do
     expect { validator.call(params) }.to_not raise_error
   end
 
-  it 'should raise on hash of non-scalar values' do
+  it 'should raise on hash of implicit non-scalar values' do
     schema    = TypedParams::Schema.new(type: :hash)
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { a: 1, b: 2, c: { d: 3 } })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error TypedParams::InvalidParameterError
+  end
+
+  it 'should raise on hash of explicit non-scalar values' do
+    schema    = TypedParams::Schema.new(type: :hash, allow_non_scalars: false)
     params    = TypedParams::Parameterizer.new(schema:).call(value: { a: 1, b: 2, c: { d: 3 } })
     validator = TypedParams::Validator.new(schema:)
 
@@ -453,6 +461,121 @@ RSpec.describe TypedParams::Validator do
     validator = TypedParams::Validator.new(schema:)
 
     expect { validator.call(params) }.to_not raise_error
+  end
+
+  it 'should not raise for hash with :depth maximum of 1' do
+    schema    = TypedParams::Schema.new(type: :hash, depth: { maximum: 1 })
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { a: 1, b: { c: 2, d: 3 } })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to_not raise_error
+  end
+
+  it 'should raise for hash with :depth maximum of 1' do
+    schema    = TypedParams::Schema.new(type: :hash, depth: { maximum: 1 })
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { a: 1, b: { c: 2, d: { e: 3 } } })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error(TypedParams::InvalidParameterError) do |err|
+      expect(err.path.to_s).to eq 'b.d'
+      expect(err.message).to include 'maximum depth of 1 exceeded'
+    end
+  end
+
+  it 'should not raise for array with :depth maximum of 2' do
+    schema    = TypedParams::Schema.new(type: :array, depth: { maximum: 2 })
+    params    = TypedParams::Parameterizer.new(schema:).call(value: [1, [2, [3, 4]]])
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to_not raise_error
+  end
+
+  it 'should raise for array with :depth maximum of 2' do
+    schema    = TypedParams::Schema.new(type: :array, depth: { maximum: 2 })
+    params    = TypedParams::Parameterizer.new(schema:).call(value: [1, [2, [[3], 4]]])
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error(TypedParams::InvalidParameterError) do |err|
+      expect(err.path.to_s).to eq '[1][1][0]'
+      expect(err.message).to include 'maximum depth of 2 exceeded'
+    end
+  end
+
+  it 'should raise for hash with :depth maximum of 0' do
+    schema    = TypedParams::Schema.new(type: :hash, depth: { maximum: 0 })
+    params    = TypedParams::Parameterizer.new(schema:).call(value: { a: 1, b: { c: 2 } })
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error(TypedParams::InvalidParameterError) do |err|
+      expect(err.path.to_s).to eq 'b'
+      expect(err.message).to include 'maximum depth of 0 exceeded'
+    end
+  end
+
+  it 'should raise for array with :depth maximum of 0' do
+    schema    = TypedParams::Schema.new(type: :array, depth: { maximum: 0 })
+    params    = TypedParams::Parameterizer.new(schema:).call(value: [1, [2], 3])
+    validator = TypedParams::Validator.new(schema:)
+
+    expect { validator.call(params) }.to raise_error(TypedParams::InvalidParameterError) do |err|
+      expect(err.path.to_s).to eq '[1]'
+      expect(err.message).to include 'maximum depth of 0 exceeded'
+    end
+  end
+
+  it 'should reject invalid depth hash' do
+    expect { TypedParams::Schema.new(type: :hash, depth: { limit: 2 }) }.to raise_error ArgumentError
+  end
+
+  it 'should automatically enable non-scalars when :depth is set' do
+    schema = TypedParams::Schema.new(type: :hash, depth: { maximum: 2 })
+
+    expect(schema.allow_non_scalars?).to be true
+  end
+
+  it 'should return correct path for hash :depth violation' do
+    schema = TypedParams::Schema.new(type: :hash) do
+      param :foo, type: :hash do
+        param :bar, type: :hash, depth: { maximum: 2 }
+      end
+    end
+
+    validator = TypedParams::Validator.new(schema:)
+    params    = TypedParams::Parameterizer.new(schema:).call(value: {
+      foo: {
+        bar: {
+          baz: { qux: [1, { quxx: 2 }] }
+        }
+      }
+    })
+
+    expect { validator.call(params) }.to raise_error(TypedParams::InvalidParameterError) do |err|
+      expect(err.path.to_s).to eq 'foo.bar.baz.qux[1]'
+      expect(err.message).to include 'maximum depth of 2 exceeded'
+    end
+  end
+
+  it 'should return correct path for array :depth violation' do
+    schema = TypedParams::Schema.new(type: :hash) do
+      param :foo, type: :hash do
+        param :bar, type: :array, depth: { maximum: 1 }
+      end
+    end
+
+    validator = TypedParams::Validator.new(schema:)
+    params    = TypedParams::Parameterizer.new(schema:).call(value: {
+      foo: {
+        bar: [
+          { baz: 1 },
+          { qux: [{ quxx: 2 }] }
+        ]
+      }
+    })
+
+    expect { validator.call(params) }.to raise_error(TypedParams::InvalidParameterError) do |err|
+      expect(err.path.to_s).to eq 'foo.bar[1].qux'
+      expect(err.message).to include 'maximum depth of 1 exceeded'
+    end
   end
 
   it 'should not raise on array of objects' do

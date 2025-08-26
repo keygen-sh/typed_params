@@ -34,6 +34,7 @@ module TypedParams
       exclusion: nil,
       format: nil,
       length: nil,
+      depth: nil,
       transform: nil,
       validate: nil,
       if: nil,
@@ -76,6 +77,9 @@ module TypedParams
             length.key?(:is)
         )
 
+      raise ArgumentError, 'depth must be a hash with :maximum key' unless
+        depth.nil? || depth.is_a?(Hash) && depth.key?(:maximum)
+
       @controller        = controller
       @source            = source
       @type              = Types[type]
@@ -88,14 +92,15 @@ module TypedParams
       @coerce            = coerce && @type.coercable?
       @polymorphic       = polymorphic
       @allow_blank       = key == ROOT || allow_blank
+      @allow_non_scalars = allow_non_scalars || depth.present?
       @allow_nil         = allow_nil
-      @allow_non_scalars = allow_non_scalars
       @nilify_blanks     = nilify_blanks
       @noop              = noop
       @inclusion         = inclusion
       @exclusion         = exclusion
       @format            = format
       @length            = length
+      @depth             = depth
       @casing            = casing
       @transform         = transform
       @children          = nil
@@ -118,6 +123,9 @@ module TypedParams
 
       @validations << Validations::Length.new(length) if
         length.present?
+
+      @validations << Validations::Depth.new(depth) if
+        depth.present?
 
       @validations << Validations::Validation.wrap(validate) if
         validate.present?
@@ -260,6 +268,7 @@ module TypedParams
         []
       end
     end
+
 
     def root?              = key == ROOT
     def child?             = !root?

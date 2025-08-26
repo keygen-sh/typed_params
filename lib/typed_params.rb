@@ -40,6 +40,7 @@ require 'typed_params/types/string'
 require 'typed_params/types/symbol'
 require 'typed_params/types/time'
 require 'typed_params/types/type'
+require 'typed_params/validations/depth'
 require 'typed_params/validations/exclusion'
 require 'typed_params/validations/format'
 require 'typed_params/validations/inclusion'
@@ -59,8 +60,21 @@ module TypedParams
 
   class UndefinedActionError < StandardError; end
   class InvalidMethodError < StandardError; end
-  class ValidationError < StandardError; end
   class CoercionError < StandardError; end
+
+  class ValidationError < StandardError
+    attr_reader :path
+
+    def initialize(message, path: nil)
+      @path = path
+
+      super(message)
+    end
+
+    def inspect
+      "#<#{self.class.name} message=#{message.inspect} path=#{path.inspect}>"
+    end
+  end
 
   class InvalidParameterError < StandardError
     attr_reader :source,

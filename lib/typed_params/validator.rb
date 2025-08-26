@@ -67,7 +67,7 @@ module TypedParams
         schema.validations.each do |validation|
           validation.call(param.value)
         rescue ValidationError => e
-          raise InvalidParameterError.new(e.message, path: param.path, source: schema.source)
+          raise InvalidParameterError.new(e.message, path: param.path + e.path, source: schema.source)
         end
       end
     end

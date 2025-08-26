@@ -12,21 +12,29 @@ module TypedParams
     def to_json_pointer = '/' + keys.map { transform_key(_1) }.join('/')
     def to_dot_notation = keys.map { transform_key(_1) }.join('.')
 
+    def +(other)
+      raise ArgumentError, 'must be a Path object or nil' unless other in Path | nil
+
+      return self if
+        other.nil?
+
+      Path.new(*keys, *other.keys, casing:)
+    end
+
     def to_s
       keys.map { transform_key(_1) }.reduce(+'') do |s, key|
-        next s << key if s.blank?
-
         case key
         when Integer
           s << "[#{key}]"
         else
-          s << ".#{key}"
+          s << '.' unless s.blank?
+          s << key.to_s
         end
       end
     end
 
     def inspect
-      "#<#{self.class.name}: #{to_s.inspect}>"
+      "#<#{self.class.name}: #{to_s.inspect} keys=#{keys.inspect} casing=#{casing.inspect}>"
     end
 
     private
