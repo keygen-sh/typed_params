@@ -42,7 +42,7 @@ RSpec.describe TypedParams::Validator do
       params    = TypedParams::Parameterizer.new(schema:).call(value: { foo: { bar: value } })
       validator = TypedParams::Validator.new(schema:)
 
-      expect { validator.call(params) }.to_not raise_error TypedParams::InvalidParameterError
+      expect { validator.call(params) }.to_not raise_error
     end
   end
 
