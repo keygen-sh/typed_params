@@ -269,7 +269,6 @@ module TypedParams
       end
     end
 
-
     def root?              = key == ROOT
     def child?             = !root?
     def children?          = !children.blank?
