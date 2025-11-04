@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1
+
+- Remove deprecated `ActiveSupport::Configurable`.
+
 ## 1.4.0
 
 - Add `depth:` validator for asserting maximum depth of `hash` and `array` params.
