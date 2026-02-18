@@ -6,8 +6,11 @@ module TypedParams
       def initialize(options) = @options = options
       def call(value)         = raise NotImplementedError
 
+      # wraps a callable e.g. Proc for use as a Validation
       def self.wrap(fn)
-        -> v { raise ValidationError, 'is invalid' unless fn.call(v) }
+        return fn if fn in Validation
+
+        Wrapped.new(fn)
       end
 
       private

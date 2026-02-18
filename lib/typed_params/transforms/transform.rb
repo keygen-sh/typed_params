@@ -3,9 +3,14 @@
 module TypedParams
   module Transforms
     class Transform
-      def call(key, value) = raise NotImplementedError
+      def call(param) = raise NotImplementedError
 
-      def self.wrap(fn) = fn
+      # wraps a callable e.g. Proc for use as a Transform
+      def self.wrap(fn)
+        return fn if fn in Transform
+
+        Wrapped.new(fn)
+      end
     end
   end
 end

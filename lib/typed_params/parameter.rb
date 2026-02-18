@@ -4,17 +4,19 @@ require 'typed_params/path'
 
 module TypedParams
   class Parameter
-    attr_accessor :key,
-                  :value
+    attr_accessor :value
 
-    attr_reader :schema,
-                :parent
+    attr_reader :key,
+                :schema,
+                :parent,
+                :deleted
 
     def initialize(key:, value:, schema:, parent: nil)
-      @key    = key
-      @value  = value
-      @schema = schema
-      @parent = parent
+      @key     = key
+      @value   = value
+      @schema  = schema
+      @parent  = parent
+      @deleted = false
     end
 
     def array?  = Types.array?(value)
@@ -48,8 +50,18 @@ module TypedParams
       end
     end
 
+    def deleted? = !!deleted
     def delete
       raise NotImplementedError, "cannot delete param: #{key.inspect}" unless
+        parent?
+
+      @deleted = true
+
+      pop
+    end
+
+    def pop
+      raise NotImplementedError, "cannot pop param: #{key.inspect}" unless
         parent?
 
       case parent.value
@@ -61,6 +73,18 @@ module TypedParams
         )
       end
     end
+
+    def rename(new_key)
+      return if
+        key == new_key
+
+      if parent?
+        parent[new_key] = pop # move self
+      end
+
+      @key = new_key
+    end
+    alias :key= :rename
 
     def unwrap(formatter: schema.formatter, controller: nil)
       v = case value

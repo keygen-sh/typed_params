@@ -292,4 +292,187 @@ RSpec.describe TypedParams::Transformer do
       expect(params[:foo]).to be nil
     end
   end
+
+  context 'with collapse' do
+    it 'should collapse with default parent_child order' do
+      schema = TypedParams::Schema.new type: :hash do
+        param :resource, type: :hash, collapse: true do
+          param :type, type: :string
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource: { type: 'users', id: '123' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:resource_type].value).to eq 'users'
+      expect(params[:resource_id].value).to eq '123'
+    end
+
+    it 'should collapse with child_parent format' do
+      schema = TypedParams::Schema.new type: :hash do
+        param :date, type: :hash, collapse: { format: :child_parent } do
+          param :start, type: :string
+          param :end, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { date: { start: '2024-01-01', end: '2024-12-31' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:date]).to be nil
+      expect(params[:start_date].value).to eq '2024-01-01'
+      expect(params[:end_date].value).to eq '2024-12-31'
+    end
+
+    it 'should collapse with child format' do
+      schema = TypedParams::Schema.new type: :hash do
+        param :resource, type: :hash, collapse: { format: :child } do
+          param :type, type: :string
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource: { type: 'users', id: '123' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:type].value).to eq 'users'
+      expect(params[:id].value).to eq '123'
+    end
+
+    it 'should collapse with custom separator via lambda' do
+      schema = TypedParams::Schema.new type: :hash do
+        param :resource, type: :hash, collapse: ->(pk, pv, ck, cv) { [:"#{pk}-#{ck}", cv] } do
+          param :type, type: :string
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource: { type: 'users', id: '123' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:'resource-type'].value).to eq 'users'
+      expect(params[:'resource-id'].value).to eq '123'
+    end
+
+    it 'should collapse with custom lambda' do
+      schema = TypedParams::Schema.new type: :hash do
+        param :resource, type: :hash, collapse: -> (pk, pv, ck, cv) { [:"#{ck}_#{pk}", cv.upcase] } do
+          param :type, type: :string
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource: { type: 'users', id: 'abc' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:type_resource].value).to eq 'USERS'
+      expect(params[:id_resource].value).to eq 'ABC'
+    end
+
+    it 'should collapse using aliased child key' do
+      schema = TypedParams::Schema.new type: :hash do
+        param :resource, type: :hash, collapse: true do
+          param :type, type: :string, as: :kind
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource: { type: 'users', id: '123' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:resource_kind].value).to eq 'users'
+      expect(params[:resource_id].value).to eq '123'
+    end
+
+    it 'should silently overwrite existing sibling on collapse' do
+      schema = TypedParams::Schema.new type: :hash do
+        param :resource_type, type: :string
+        param :resource, type: :hash, collapse: true do
+          param :type, type: :string
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource_type: 'original', resource: { type: 'users', id: '123' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:resource_type].value).to eq 'users'
+      expect(params[:resource_id].value).to eq '123'
+    end
+
+    it 'should apply casing after collapse with lower_camel' do
+      schema = TypedParams::Schema.new type: :hash, casing: :lower_camel do
+        param :resource, type: :hash, collapse: true do
+          param :type, type: :string
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource: { type: 'users', id: '123' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:resourceType].value).to eq 'users'
+      expect(params[:resourceId].value).to eq '123'
+    end
+
+    it 'should apply casing after collapse with camel' do
+      schema = TypedParams::Schema.new type: :hash, casing: :camel do
+        param :date, type: :hash, collapse: { format: :child_parent } do
+          param :start, type: :string
+          param :end, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { date: { start: '2024-01-01', end: '2024-12-31' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:date]).to be nil
+      expect(params[:StartDate].value).to eq '2024-01-01'
+      expect(params[:EndDate].value).to eq '2024-12-31'
+    end
+
+    it 'should apply casing after collapse with dash' do
+      schema = TypedParams::Schema.new type: :hash, casing: :dash do
+        param :resource, type: :hash, collapse: true do
+          param :type, type: :string
+          param :id, type: :string
+        end
+      end
+
+      params      = TypedParams::Parameterizer.new(schema:).call(value: { resource: { type: 'users', id: '123' } })
+      transformer = TypedParams::Transformer.new(schema:)
+
+      transformer.call(params)
+
+      expect(params[:resource]).to be nil
+      expect(params[:'resource-type'].value).to eq 'users'
+      expect(params[:'resource-id'].value).to eq '123'
+    end
+  end
 end

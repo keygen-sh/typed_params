@@ -61,6 +61,88 @@ RSpec.describe TypedParams::Parameter do
     end
   end
 
+  describe '#deleted?' do
+    it 'should be false before delete' do
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: { bar: [{ baz: 0 }] } })
+
+      expect(params[:foo].deleted?).to be false
+    end
+
+    it 'should be true after delete' do
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: { bar: [{ baz: 0 }] } })
+      child  = params[:foo]
+
+      child.delete
+
+      expect(child.deleted?).to be true
+    end
+  end
+
+  describe '#rename' do
+    let(:schema) { TypedParams::Schema.new(type: :hash) { param :foo, type: :string } }
+
+    it 'should rename child param in hash' do
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: 'bar' })
+      child  = params[:foo]
+
+      child.rename(:qux)
+
+      expect(child.key).to eq :qux
+      expect(params[:foo]).to be nil
+      expect(params[:qux]).to eq child
+    end
+
+    it 'should not rename when key is unchanged' do
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: 'bar' })
+      child  = params[:foo]
+
+      child.rename(:foo)
+
+      expect(child.key).to eq :foo
+      expect(params[:foo]).to eq child
+    end
+
+    context 'with array' do
+      let(:schema) { TypedParams::Schema.new(type: :array) { items type: :string } }
+
+      it 'should rename child param in array' do
+        params = TypedParams::Parameterizer.new(schema:).call(value: %w[a b])
+        child  = params[0]
+
+        child.rename(5)
+
+        expect(child.key).to eq 5
+        expect(params[0]).to_not eq child
+        expect(params[5]).to eq child
+      end
+    end
+  end
+
+  describe '#key=' do
+    let(:schema) { TypedParams::Schema.new(type: :hash) { param :foo, type: :string } }
+
+    it 'should rename child param' do
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: 'bar' })
+      child  = params[:foo]
+
+      child.key = :qux
+
+      expect(child.key).to eq :qux
+      expect(params[:foo]).to be nil
+      expect(params[:qux]).to eq child
+    end
+
+    it 'should not rename child param' do
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: 'bar' })
+      child  = params[:foo]
+
+      child.key = :foo
+
+      expect(child.key).to eq :foo
+      expect(params[:foo]).to eq child
+    end
+  end
+
   describe '#path' do
     it 'should have correct path' do
       params = TypedParams::Parameterizer.new(schema:).call(value: { foo: { bar: [{ baz: 0 }, { baz: 1 }] } })

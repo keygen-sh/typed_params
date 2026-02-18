@@ -214,6 +214,28 @@ RSpec.describe TypedParams::Schema do
     end
   end
 
+  describe '#coerce' do
+    it 'should raise when coercing array with children' do
+      expect { TypedParams::Schema.new(type: :hash) { param(:foo, type: :array, coerce: true) { item type: :string } } }
+        .to raise_error ArgumentError
+    end
+
+    it 'should not raise when coercing array without children' do
+      expect { TypedParams::Schema.new(type: :hash) { param :foo, type: :array, coerce: true } }
+        .to_not raise_error
+    end
+
+    it 'should raise when coercing hash with children' do
+      expect { TypedParams::Schema.new(type: :hash) { param(:foo, type: :hash, coerce: true) { param :bar, type: :string } } }
+        .to raise_error ArgumentError
+    end
+
+    it 'should not raise when coercing hash without children' do
+      expect { TypedParams::Schema.new(type: :hash) { param :foo, type: :hash, coerce: true } }
+        .to_not raise_error
+    end
+  end
+
   describe '#format' do
     it 'should not raise for root node' do
       expect { TypedParams::Schema.new { format :jsonapi } }

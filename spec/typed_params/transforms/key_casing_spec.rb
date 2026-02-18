@@ -13,11 +13,18 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should not transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => 'baz' })
+      context "with string key #{key.inspect}" do
+        it 'should not transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => 'baz' } },
+          )
 
-        expect(k).to eq key
-        expect(v).to eq key => 'baz'
+          transform.call(params[key])
+
+          expect(params[key].key).to eq key
+          expect(params[key].value).to eq key => 'baz'
+        end
       end
     end
 
@@ -27,11 +34,18 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should not transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => :baz })
+      context "with symbol key #{key.inspect}" do
+        it 'should not transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => :baz } },
+          )
 
-        expect(k).to eq key
-        expect(v).to eq key => :baz
+          transform.call(params[key])
+
+          expect(params[key].key).to eq key
+          expect(params[key].value).to eq key => :baz
+        end
       end
     end
   end
@@ -45,11 +59,18 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => 'baz' })
+      context "with string key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => 'baz' } },
+          )
 
-        expect(k).to eq 'foo_bar'
-        expect(v).to eq k => 'baz'
+          transform.call(params[key])
+
+          expect(params['foo_bar'].key).to eq 'foo_bar'
+          expect(params['foo_bar'].value).to eq 'foo_bar' => 'baz'
+        end
       end
     end
 
@@ -59,92 +80,91 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => :baz })
+      context "with symbol key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => :baz } },
+          )
 
-        expect(k).to eq :foo_bar
-        expect(v).to eq k => :baz
+          transform.call(params[key])
+
+          expect(params[:foo_bar].key).to eq :foo_bar
+          expect(params[:foo_bar].value).to eq foo_bar: :baz
+        end
       end
     end
 
-    it 'should transform shallow array' do
-      k, v = transform.call('rootKey', %w[a_value another_value])
+    context 'with shallow array value' do
+      it 'should transform key but not array values' do
+        schema = TypedParams::Schema.new(type: :hash) { param :rootKey, type: :array }
+        params = TypedParams::Parameterizer.new(schema:).call(\
+          value: {
+            rootKey: %w[a_value another_value],
+          },
+        )
 
-      expect(k).to eq 'root_key'
-      expect(v).to eq %w[a_value another_value]
+        transform.call(params[:rootKey])
+
+        expect(params[:root_key].key).to eq :root_key
+        expect(params[:root_key].value).to eq %w[a_value another_value]
+      end
     end
 
-    it 'should transform deep array' do
-      k, v = transform.call(
-        'rootKey',
-        [
+    context 'with deep array value' do
+      it 'should transform nested hash keys' do
+        schema = TypedParams::Schema.new(type: :hash) { param :rootKey, type: :array }
+        params = TypedParams::Parameterizer.new(schema:).call(
+          value: {
+            rootKey: [
+              'child_value',
+              { 'childKey' => [{ 'grandchildKey' => { 'greatGrandchildKey' => %i[a_value another_value] } }] },
+            ],
+          },
+        )
+
+        transform.call(params[:rootKey])
+
+        expect(params[:root_key].key).to eq :root_key
+        expect(params[:root_key].value).to eq [
           'child_value',
-          {
-            'childKey' => [
-              { 'grandchildKey' => { 'greatGrandchildKey' => %i[a_value another_value] } },
-              { 'grandchildKey' => { 'greatGrandchildKey' => %s[a_value another_value] } },
-            ],
-          },
-          :child_value,
-          {
-            'childKey' => [
-              { 'grandchildKey' => { 'greatGrandchildKey' => [1, 2, 3] } },
-            ],
-          },
-          1,
-        ],
-      )
-
-      expect(k).to eq 'root_key'
-      expect(v).to eq [
-        'child_value',
-        {
-          'child_key' => [
-            { 'grandchild_key' => { 'great_grandchild_key' => %i[a_value another_value] } },
-            { 'grandchild_key' => { 'great_grandchild_key' => %s[a_value another_value] } },
-          ],
-        },
-        :child_value,
-        {
-          'child_key' => [
-            { 'grandchild_key' => { 'great_grandchild_key' => [1, 2, 3] } },
-          ],
-        },
-        1,
-      ]
+          { 'child_key' => [{ 'grandchild_key' => { 'great_grandchild_key' => %i[a_value another_value] } }] },
+        ]
+      end
     end
 
-    it 'should transform shallow hash' do
-      k, v = transform.call(:rootKey, { aKey: :a_value, anotherKey: :another_value })
+    context 'with shallow hash value' do
+      it 'should transform key and nested keys' do
+        schema = TypedParams::Schema.new(type: :hash) { param :rootKey, type: :hash }
+        params = TypedParams::Parameterizer.new(schema:).call(
+          value: {
+            rootKey: { aKey: :a_value, anotherKey: :another_value },
+          },
+        )
 
-      expect(k).to eq :root_key
-      expect(v).to eq a_key: :a_value, another_key: :another_value
+        transform.call(params[:rootKey])
+
+        expect(params[:root_key].key).to eq :root_key
+        expect(params[:root_key].value).to eq a_key: :a_value, another_key: :another_value
+      end
     end
 
-    it 'should transform deep hash' do
-      k, v = transform.call(
-        :rootKey,
-        {
-          childKey: [
-            { grandchildKey: { greatGrandchildKey: %i[a_value another_value] } },
-            'grandchild_value',
-            { grandchildKey: { greatGrandchildKey: %s[a_value another_value] } },
-            :grandchild_value,
-            { grandchildKey: { greatGrandchildKey: [1, 2, 3] } },
-            1,
-          ]
-        },
-      )
+    context 'with deep hash value' do
+      it 'should transform nested hash keys' do
+        schema = TypedParams::Schema.new(type: :hash) { param :rootKey, type: :hash }
+        params = TypedParams::Parameterizer.new(schema:).call(
+          value: {
+            rootKey: {
+              childKey: [{ grandchildKey: { greatGrandchildKey: %i[a_value another_value] } }],
+            },
+          },
+        )
 
-      expect(k).to eq :root_key
-      expect(v).to eq child_key: [
-        { grandchild_key: { great_grandchild_key: %i[a_value another_value] } },
-        'grandchild_value',
-        { grandchild_key: { great_grandchild_key: %s[a_value another_value] } },
-        :grandchild_value,
-        { grandchild_key: { great_grandchild_key: [1, 2, 3] } },
-        1,
-      ]
+        transform.call(params[:rootKey])
+
+        expect(params[:root_key].key).to eq :root_key
+        expect(params[:root_key].value).to eq child_key: [{ grandchild_key: { great_grandchild_key: %i[a_value another_value] } }]
+      end
     end
   end
 
@@ -157,11 +177,17 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => 'baz' })
+      context "with string key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => 'baz' } },
+          )
 
-        expect(k).to eq 'FooBar'
-        expect(v).to eq k => 'baz'
+          transform.call(params[key])
+
+          expect(params['FooBar'].key).to eq 'FooBar'
+        end
       end
     end
 
@@ -171,92 +197,34 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => :baz })
+      context "with symbol key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => :baz } },
+          )
 
-        expect(k).to eq :FooBar
-        expect(v).to eq k => :baz
+          transform.call(params[key])
+
+          expect(params[:FooBar].key).to eq :FooBar
+        end
       end
     end
 
-    it 'should transform shallow array' do
-      k, v = transform.call('root_key', %w[a_value another_value])
-
-      expect(k).to eq 'RootKey'
-      expect(v).to eq %w[a_value another_value]
-    end
-
-    it 'should transform deep array' do
-      k, v = transform.call(
-        'root_key',
-        [
-          'child_value',
-          {
-            'child_key' => [
-              { 'grandchild_key' => { 'great_grandchild_key' => %i[a_value another_value] } },
-              { 'grandchild_key' => { 'great_grandchild_key' => %s[a_value another_value] } },
-            ],
+    context 'with shallow hash value' do
+      it 'should transform key and nested keys' do
+        schema = TypedParams::Schema.new(type: :hash) { param :root_key, type: :hash }
+        params = TypedParams::Parameterizer.new(schema:).call(
+          value: {
+            root_key: { a_key: :a_value, another_key: :another_value },
           },
-          :child_value,
-          {
-            'child_key' => [
-              { 'grandchild_key' => { 'great_grandchild_key' => [1, 2, 3] } },
-            ],
-          },
-          1,
-        ],
-      )
+        )
 
-      expect(k).to eq 'RootKey'
-      expect(v).to eq [
-        'child_value',
-        {
-          'ChildKey' => [
-            { 'GrandchildKey' => { 'GreatGrandchildKey' => %i[a_value another_value] } },
-            { 'GrandchildKey' => { 'GreatGrandchildKey' => %s[a_value another_value] } },
-          ],
-        },
-        :child_value,
-        {
-          'ChildKey' => [
-            { 'GrandchildKey' => { 'GreatGrandchildKey' => [1, 2, 3] } },
-          ],
-        },
-        1,
-      ]
-    end
+        transform.call(params[:root_key])
 
-    it 'should transform shallow hash' do
-      k, v = transform.call(:root_key, { a_key: :a_value, another_key: :another_value })
-
-      expect(k).to eq :RootKey
-      expect(v).to eq AKey: :a_value, AnotherKey: :another_value
-    end
-
-    it 'should transform deep hash' do
-      k, v = transform.call(
-        :root_key,
-        {
-          child_key: [
-            { grandchild_key: { great_grandchild_key: %i[a_value another_value] } },
-            'grandchild_value',
-            { grandchild_key: { great_grandchild_key: %s[a_value another_value] } },
-            :grandchild_value,
-            { grandchild_key: { great_grandchild_key: [1, 2, 3] } },
-            1,
-          ],
-        },
-      )
-
-      expect(k).to eq :RootKey
-      expect(v).to eq ChildKey: [
-        { GrandchildKey: { GreatGrandchildKey: %i[a_value another_value] } },
-        'grandchild_value',
-        { GrandchildKey: { GreatGrandchildKey: %s[a_value another_value] } },
-        :grandchild_value,
-        { GrandchildKey: { GreatGrandchildKey: [1, 2, 3] } },
-        1,
-      ]
+        expect(params[:RootKey].key).to eq :RootKey
+        expect(params[:RootKey].value).to eq AKey: :a_value, AnotherKey: :another_value
+      end
     end
   end
 
@@ -269,11 +237,17 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => 'baz' })
+      context "with string key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => 'baz' } },
+          )
 
-        expect(k).to eq 'fooBar'
-        expect(v).to eq k => 'baz'
+          transform.call(params[key])
+
+          expect(params['fooBar'].key).to eq 'fooBar'
+        end
       end
     end
 
@@ -283,92 +257,34 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => :baz })
+      context "with symbol key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => :baz } },
+          )
 
-        expect(k).to eq :fooBar
-        expect(v).to eq k => :baz
+          transform.call(params[key])
+
+          expect(params[:fooBar].key).to eq :fooBar
+        end
       end
     end
 
-    it 'should transform shallow array' do
-      k, v = transform.call('root_key', %w[a_value another_value])
-
-      expect(k).to eq 'rootKey'
-      expect(v).to eq %w[a_value another_value]
-    end
-
-    it 'should transform deep array' do
-      k, v = transform.call(
-        'root_key',
-        [
-          'child_value',
-          {
-            'child_key' => [
-              { 'grandchild_key' => { 'great_grandchild_key' => %i[a_value another_value] } },
-              { 'grandchild_key' => { 'great_grandchild_key' => %s[a_value another_value] } },
-            ],
+    context 'with shallow hash value' do
+      it 'should transform key and nested keys' do
+        schema = TypedParams::Schema.new(type: :hash) { param :root_key, type: :hash }
+        params = TypedParams::Parameterizer.new(schema:).call(
+          value: {
+            root_key: { a_key: :a_value, another_key: :another_value },
           },
-          :child_value,
-          {
-            'child_key' => [
-              { 'grandchild_key' => { 'great_grandchild_key' => [1, 2, 3] } },
-            ],
-          },
-          1,
-        ],
-      )
+        )
 
-      expect(k).to eq 'rootKey'
-      expect(v).to eq [
-        'child_value',
-        {
-          'childKey' => [
-            { 'grandchildKey' => { 'greatGrandchildKey' => %i[a_value another_value] } },
-            { 'grandchildKey' => { 'greatGrandchildKey' => %s[a_value another_value] } },
-          ],
-        },
-        :child_value,
-        {
-          'childKey' => [
-            { 'grandchildKey' => { 'greatGrandchildKey' => [1, 2, 3] } },
-          ],
-        },
-        1,
-      ]
-    end
+        transform.call(params[:root_key])
 
-    it 'should transform shallow hash' do
-      k, v = transform.call(:root_key, { a_key: :a_value, another_key: :another_value })
-
-      expect(k).to eq :rootKey
-      expect(v).to eq aKey: :a_value, anotherKey: :another_value
-    end
-
-    it 'should transform deep hash' do
-      k, v = transform.call(
-        :root_key,
-        {
-          child_key: [
-            { grandchild_key: { great_grandchild_key: %i[a_value another_value] } },
-            'grandchild_value',
-            { grandchild_key: { great_grandchild_key: %s[a_value another_value] } },
-            :grandchild_value,
-            { grandchild_key: { great_grandchild_key: [1, 2, 3] } },
-            1,
-          ],
-        },
-      )
-
-      expect(k).to eq :rootKey
-      expect(v).to eq childKey: [
-        { grandchildKey: { greatGrandchildKey: %i[a_value another_value] } },
-        'grandchild_value',
-        { grandchildKey: { greatGrandchildKey: %s[a_value another_value] } },
-        :grandchild_value,
-        { grandchildKey: { greatGrandchildKey: [1, 2, 3] } },
-        1,
-      ]
+        expect(params[:rootKey].key).to eq :rootKey
+        expect(params[:rootKey].value).to eq aKey: :a_value, anotherKey: :another_value
+      end
     end
   end
 
@@ -381,11 +297,17 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => 'baz' })
+      context "with string key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => 'baz' } },
+          )
 
-        expect(k).to eq 'foo-bar'
-        expect(v).to eq k => 'baz'
+          transform.call(params[key])
+
+          expect(params['foo-bar'].key).to eq 'foo-bar'
+        end
       end
     end
 
@@ -395,104 +317,50 @@ RSpec.describe TypedParams::Transforms::KeyCasing do
       FooBar
       fooBar
     ].each do |key|
-      it "should transform key: #{key.inspect}" do
-        k, v = transform.call(key, { key => :baz })
+      context "with symbol key #{key.inspect}" do
+        it 'should transform key' do
+          schema = TypedParams::Schema.new(type: :hash) { param key, type: :hash }
+          params = TypedParams::Parameterizer.new(schema:).call(
+            value: { key => { key => :baz } },
+          )
 
-        expect(k).to eq :'foo-bar'
-        expect(v).to eq k => :baz
+          transform.call(params[key])
+
+          expect(params[:'foo-bar'].key).to eq :'foo-bar'
+        end
       end
     end
 
-    it 'should transform shallow array' do
-      k, v = transform.call('root_key', %w[a_value another_value])
-
-      expect(k).to eq 'root-key'
-      expect(v).to eq %w[a_value another_value]
-    end
-
-    it 'should transform deep array' do
-      k, v = transform.call(
-        'root_key',
-        [
-          'child_value',
-          {
-            'child_key' => [
-              { 'grandchild_key' => { 'great_grandchild_key' => %i[a_value another_value] } },
-              { 'grandchild_key' => { 'great_grandchild_key' => %s[a_value another_value] } },
-            ],
+    context 'with shallow hash value' do
+      it 'should transform key and nested keys' do
+        schema = TypedParams::Schema.new(type: :hash) { param :root_key, type: :hash }
+        params = TypedParams::Parameterizer.new(schema:).call(
+          value: {
+            root_key: { a_key: :a_value, another_key: :another_value },
           },
-          :child_value,
-          {
-            'child_key' => [
-              { 'grandchild_key' => { 'great_grandchild_key' => [1, 2, 3] } },
-            ],
-          },
-          1,
-        ],
-      )
+        )
 
-      expect(k).to eq 'root-key'
-      expect(v).to eq [
-        'child_value',
-        {
-          'child-key' => [
-            { 'grandchild-key' => { 'great-grandchild-key' => %i[a_value another_value] } },
-            { 'grandchild-key' => { 'great-grandchild-key' => %s[a_value another_value] } },
-          ],
-        },
-        :child_value,
-        {
-          'child-key' => [
-            { 'grandchild-key' => { 'great-grandchild-key' => [1, 2, 3] } },
-          ],
-        },
-        1,
-      ]
-    end
+        transform.call(params[:root_key])
 
-    it 'should transform shallow hash' do
-      k, v = transform.call(:root_key, { a_key: :a_value, another_key: :another_value })
-
-      expect(k).to eq :'root-key'
-      expect(v).to eq 'a-key': :a_value, 'another-key': :another_value
-    end
-
-    it 'should transform deep hash' do
-      k, v = transform.call(
-        :root_key,
-        {
-          child_key: [
-            { grandchild_key: { great_grandchild_key: %i[a_value another_value] } },
-            'grandchild_value',
-            { grandchild_key: { great_grandchild_key: %s[a_value another_value] } },
-            :grandchild_value,
-            { grandchild_key: { great_grandchild_key: [1, 2, 3] } },
-            1,
-          ],
-        },
-      )
-
-      expect(k).to eq :'root-key'
-      expect(v).to eq 'child-key': [
-        { 'grandchild-key': { 'great-grandchild-key': %i[a_value another_value] } },
-        'grandchild_value',
-        { 'grandchild-key': { 'great-grandchild-key': %s[a_value another_value] } },
-        :grandchild_value,
-        { 'grandchild-key': { 'great-grandchild-key': [1, 2, 3] } },
-        1,
-      ]
+        expect(params[:'root-key'].key).to eq :'root-key'
+        expect(params[:'root-key'].value).to eq 'a-key': :a_value, 'another-key': :another_value
+      end
     end
   end
 
   context 'with config key transform' do
     before { TypedParams.config.key_transform = :dash }
 
-    it "should transform key" do
-      k, v = transform.call(:foo_bar, { :baz_qux => 1 })
+    it 'should transform key using config' do
+      schema = TypedParams::Schema.new(type: :hash) { param :foo_bar, type: :hash }
+      params = TypedParams::Parameterizer.new(schema:).call(
+        value: { foo_bar: { baz_qux: 1 } },
+      )
 
-      expect(k).to eq :'foo-bar'
-      expect(v).to eq :'baz-qux' => 1
+      transform.call(params[:foo_bar])
+
+      expect(params[:'foo-bar'].key).to eq :'foo-bar'
+      expect(params[:'foo-bar'].value).to eq 'baz-qux': 1
     end
-
   end
 end
