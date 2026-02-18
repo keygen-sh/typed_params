@@ -5,12 +5,15 @@ require 'typed_params/transforms/transform'
 module TypedParams
   module Transforms
     class KeyAlias < Transform
-      def initialize(as) = @as = as
-      def call(_, value) = [as, value]
+      def initialize(key) = @key = key
+
+      def call(param)
+        param.key = key
+      end
 
       private
 
-      attr_reader :as
+      attr_reader :key
     end
   end
 end

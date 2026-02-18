@@ -41,6 +41,7 @@ module TypedParams
       unless: nil,
       as: nil,
       alias: nil,
+      collapse: nil,
       casing: TypedParams.config.key_transform,
       &block
     )
@@ -80,6 +81,9 @@ module TypedParams
       raise ArgumentError, 'depth must be a hash with :maximum key' unless
         depth.nil? || depth.is_a?(Hash) && depth.key?(:maximum)
 
+      raise ArgumentError, 'collapse must be true, a hash, or a proc' unless
+        collapse.nil? || collapse == true || collapse.is_a?(Hash) || collapse.is_a?(Proc)
+
       @controller        = controller
       @source            = source
       @type              = Types[type]
@@ -103,6 +107,8 @@ module TypedParams
       @depth             = depth
       @casing            = casing
       @transform         = transform
+      @validate          = validate
+      @collapse          = collapse
       @children          = nil
       @if                = binding.local_variable_get(:if)
       @unless            = binding.local_variable_get(:unless)
@@ -142,6 +148,9 @@ module TypedParams
       @transforms << Transforms::Transform.wrap(transform) if
         transform.present?
 
+      @transforms << Transforms::Collapse.new(collapse) if
+        collapse.present?
+
       @transforms << Transforms::KeyCasing.new(casing) if
         casing.present?
 
@@ -152,8 +161,11 @@ module TypedParams
         @type.nil?
 
       if block_given?
-        raise ArgumentError, "type #{@type} does not accept a block" if
-          @type.present? && !@type.accepts_block?
+        raise ArgumentError, "type #{@type} does not accept a block" unless
+          @type.accepts_block?
+
+        raise ArgumentError, "type #{@type} with a block cannot be coerced" if
+          @coerce
 
         @children = case
                     when Types.array?(@type)
@@ -292,6 +304,7 @@ module TypedParams
     def scalar?            = type.scalar?
     def any?               = type.any?
     def formatter?         = !!@formatter
+    def collapse?          = !!@collapse
 
     def inspect
       "#<#{self.class.name} key=#{key.inspect} type=#{type.inspect} children=#{children.inspect}>"

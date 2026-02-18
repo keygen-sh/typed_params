@@ -5,29 +5,49 @@ require 'spec_helper'
 RSpec.describe TypedParams::Transforms::NilifyBlanks do
   let(:transform) { TypedParams::Transforms::NilifyBlanks.new }
 
-  [
-    string: '',
-    array: [],
-    hash: {},
-  ].each do |key, value|
-    it "should transform blank #{key} to nil" do
-      k, v = transform.call(key, value)
+  context 'with blank string' do
+    it 'should transform to nil' do
+      schema = TypedParams::Schema.new(type: :hash) { param :foo, type: :string, allow_nil: true }
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: '' })
 
-      expect(k).to eq key
-      expect(v).to be nil
+      transform.call(params[:foo])
+
+      expect(params[:foo].key).to eq :foo
+      expect(params[:foo].value).to be nil
     end
   end
 
-  [
-    string: 'foo',
-    array: [:foo],
-    hash: { foo: :bar },
-  ].each do |key, value|
-    it "should not transform present #{key} to nil" do
-      k, v = transform.call(key, value)
+  context 'with present string' do
+    it 'should not transform to nil' do
+      schema = TypedParams::Schema.new(type: :hash) { param :foo, type: :string }
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: 'bar' })
 
-      expect(k).to eq key
-      expect(v).to be value
+      transform.call(params[:foo])
+
+      expect(params[:foo].key).to eq :foo
+      expect(params[:foo].value).to eq 'bar'
+    end
+  end
+
+  context 'with empty array' do
+    it 'should not transform to nil' do
+      schema = TypedParams::Schema.new(type: :hash) { param :foo, type: :array }
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: [] })
+
+      transform.call(params[:foo])
+
+      expect(params[:foo].value).to eq []
+    end
+  end
+
+  context 'with empty hash' do
+    it 'should not transform to nil' do
+      schema = TypedParams::Schema.new(type: :hash) { param :foo, type: :hash }
+      params = TypedParams::Parameterizer.new(schema:).call(value: { foo: {} })
+
+      transform.call(params[:foo])
+
+      expect(params[:foo].value).to eq({})
     end
   end
 end

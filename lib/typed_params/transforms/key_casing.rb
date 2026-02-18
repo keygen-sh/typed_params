@@ -7,11 +7,15 @@ module TypedParams
     class KeyCasing < Transform
       def initialize(casing) = @casing = casing
 
-      def call(key, value)
-        transformed_key   = transform_key(key)
-        transformed_value = transform_value(value)
+      def call(param)
+        return if
+          casing.nil?
 
-        [transformed_key, transformed_value]
+        key   = transform_key(param.key)
+        value = transform_value(param.value)
+
+        param.key   = key unless key == param.key
+        param.value = value
       end
 
       private
