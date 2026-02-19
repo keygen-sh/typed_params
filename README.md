@@ -451,6 +451,7 @@ Parameters can have validations, transforms, and more.
 - [`:depth`](#depth-validation)
 - [`:transform`](#transform-parameter)
 - [`:validate`](#validate-parameter)
+- [`:collapse`](#collapse-parameter)
 - [`:polymorphic`](#polymorphic-parameter)
 
 #### Parameter key
@@ -662,8 +663,8 @@ Only applicable for `:hash` and `:array` types. Automatically sets `allow_non_sc
 
 #### Transform parameter
 
-Transform the parameter using a lambda. This is commonly used to transform a
-parameter into a nested attributes hash or array.
+Transform the parameter using a lambda or custom transform class. This is
+commonly used to transform a parameter into a nested attributes hash or array.
 
 ```ruby
 param :role, type: :string, transform: -> _, name {
@@ -674,7 +675,20 @@ param :role, type: :string, transform: -> _, name {
 The lambda must accept a key (the current parameter key), and a value (the
 current parameter value).
 
-The lambda must return a tuple with the new key and value.
+The lambda must return a tuple with the new key and value. Return `nil` for
+the key to delete the parameter.
+
+You can also use a custom transform class:
+
+```ruby
+class UpcaseTransform < TypedParams::Transforms::Transform
+  def call(param)
+    param.value = param.value.upcase
+  end
+end
+
+param :name, type: :string, transform: UpcaseTransform.new
+```
 
 #### Validate parameter
 
@@ -707,6 +721,62 @@ error:
 param :invalid, type: :string, validate: -> v {
   raise TypedParams::ValidationError, 'is always invalid'
 }
+```
+
+You can also use a custom validation class:
+
+```ruby
+class PalindromeValidation < TypedParams::Validations::Validation
+  def call(value)
+    raise TypedParams::ValidationError, 'must be a palindrome' unless value == value.reverse
+  end
+end
+
+param :word, type: :string, validate: PalindromeValidation.new(nil)
+```
+
+#### Collapse parameter
+
+Collapse a nested hash parameter into its parent. This is useful for flattening
+nested structures.
+
+```ruby
+param :date, type: :hash, collapse: true do
+  param :start, type: :string
+  param :end, type: :string
+end
+
+typed_params # => { date_start:, date_end: }
+```
+
+The `:collapse` option accepts:
+
+- `true` - use the default `:parent_child` format
+- `{ format: :parent_child }` - prefix with parent key (e.g. `date_start`)
+- `{ format: :child_parent }` - suffix with parent key (e.g. `start_date`)
+- `{ format: :child }` - use child key only (e.g. `start`)
+- A custom Proc for full control
+
+```ruby
+param :date, type: :hash, collapse: { format: :child_parent } do
+  param :start, type: :string
+  param :end, type: :string
+end
+
+typed_params # => { start_date:, end_date: }
+
+param :resource, type: :hash, collapse: { format: :child } do
+  param :type, type: :string
+  param :id, type: :string
+end
+
+typed_params # => { type:, id: }
+
+# Custom Procs receive parent_key, parent_value, child_key, child_value
+param :resource, type: :hash, collapse: -> (pk, pv, ck, cv) { [:"#{pk}-#{ck}", cv] } do
+  param :type, type: :string
+  param :id, type: :string
+end
 ```
 
 #### Polymorphic parameter
