@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0
+
+- Add `collapse:` keyword to collapse a nested hash param into its parent. Accepts `true`, a hash with `format:` (`:parent_child`, `:child_parent`, or `:child`), or a custom Proc.
+- Add support for custom `Transform` classes in `transform:` keyword. Now accepts either a Proc or a `Transforms::Transform` subclass instance.
+- Add support for custom `Validation` classes in `validate:` keyword. Now accepts either a Proc or a `Validations::Validation` subclass instance.
+
 ## 1.4.1
 
 - Remove deprecated `ActiveSupport::Configurable`.
