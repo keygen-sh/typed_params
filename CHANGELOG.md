@@ -2,9 +2,9 @@
 
 ## 1.5.0
 
-- Add `collapse:` keyword to collapse a nested hash param into its parent. Accepts `true`, a hash with `format:` (`:parent_child`, `:child_parent`, or `:child`), or a custom Proc.
-- Add support for custom `Transform` classes in `transform:` keyword. Now accepts either a Proc or a `Transforms::Transform` subclass instance.
-- Add support for custom `Validation` classes in `validate:` keyword. Now accepts either a Proc or a `Validations::Validation` subclass instance.
+- Add `collapse:` keyword to "collapse" a hash param's children into its parent.
+- Add support for custom `Transform` classes in `transform:` keyword.
+- Add support for custom `Validation` classes in `validate:` keyword.
 
 ## 1.4.1
 
